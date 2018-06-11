@@ -1,8 +1,7 @@
-"""
-This script reads from different ADC inputs at three established frequencies,
+"""This script reads from different ADC inputs at three established frequencies,
 stores that data in three different files (one for each frequency)
 and sends the three files over to the Mosquitto server, each one published 
-at a different topic ('RasPi1/1Hz', RasPi1/10Hz', RasPi1/100Hz')
+at a different topic ('RasPi1/1Hz',' RasPi1/10Hz', 'RasPi1/100Hz')
 """
 
 from datetime import datetime
@@ -10,6 +9,7 @@ import Adafruit_ADS1x15
 import paho.mqtt.client as mqtt
 import pandas as pd
 import numpy as np
+import time
 
 #create an mqtt client instance
 mqttc = mqtt.Client("python_pub")
@@ -32,36 +32,36 @@ different chosen intervals (1Hz, 10Hz and 100Hz)"""
 def read_ten_hz():
 	while True:
 		header = ['adc', 'channel', 'time_stamp', 'value']
-		values = np.array([])
-		for i in range(600):
-			newrow00 = np.array([0, 0, datetime.now(), adc0.read_adc(0, gain=GAIN)])
-			newrow01 = np.array([0, 1, datetime.now(), adc0.read_adc(1, gain=GAIN)])
-			newrow02 = np.array([0, 2, datetime.now(), adc0.read_adc(2, gain=GAIN)])
-			newrow03 = np.array([0, 3, datetime.now(), adc0.read_adc(3, gain=GAIN)])
-			newrow10 = np.array([1, 0, datetime.now(), adc1.read_adc(0, gain=GAIN)])
-			newrow11 = np.array([1, 1, datetime.now(), adc1.read_adc(1, gain=GAIN)])
-			newrow12 = np.array([1, 2, datetime.now(), adc1.read_adc(2, gain=GAIN)])
-			newrow13 = np.array([1, 3, datetime.now(), adc1.read_adc(3, gain=GAIN)])
-			np.vstack((values, newrow00))
-			np.vstack((values, newrow01))
-			np.vstack((values, newrow02))
-			np.vstack((values, newrow03))
-			np.vstack((values, newrow10))
+		values = np.array([0, 0, np.datetime64(datetime.now()), 0])
+		for i in range(10):
+			newrow00 = np.array([0, 0, np.datetime64(datetime.now()), adc0.read_adc(0, gain=GAIN)])
+			newrow01 = np.array([0, 1, np.datetime64(datetime.now()), adc0.read_adc(1, gain=GAIN)])
+			newrow02 = np.array([0, 2, np.datetime64(datetime.now()), adc0.read_adc(2, gain=GAIN)])
+			newrow03 = np.array([0, 3, np.datetime64(datetime.now()), adc0.read_adc(3, gain=GAIN)])
+			newrow10 = np.array([1, 0, np.datetime64(datetime.now()), adc1.read_adc(0, gain=GAIN)])
+			newrow11 = np.array([1, 1, np.datetime64(datetime.now()), adc1.read_adc(1, gain=GAIN)])
+			newrow12 = np.array([1, 2, np.datetime64(datetime.now()), adc1.read_adc(2, gain=GAIN)])
+			newrow13 = np.array([1, 3, np.datetime64(datetime.now()), adc1.read_adc(3, gain=GAIN)])
+			values = np.vstack((values, newrow00))
+			values = np.vstack((values, newrow01))
+			values = np.vstack((values, newrow02))
+			values = np.vstack((values, newrow03))
+			values = np.vstack((values, newrow10))
 			np.vstack((values, newrow11))
 			np.vstack((values, newrow12))
 			np.vstack((values, newrow13))
 			time.sleep(0.1)
+			print(newrow00)
+                dataframe = pd.DataFrame(values, columns=header)
 		dataframe.to_csv('ten_hz.csv', columns=header, index=False)
-
+read_ten_hz()
 
 #Creation of threads to run in parallel
 
 
 #Executing threads at same time
 
-"""
-
-while True:
+"""while True:
     # Read the specified ADC channel
     value = adc0.read_adc(0, gain=GAIN)
 
