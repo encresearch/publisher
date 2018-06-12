@@ -48,7 +48,10 @@ def read_ten_hz():
 
             operation_time = time.time()-now
 
-            time.sleep(0.1 - operation_time)
+            if operation_time > 0.1:
+                time.sleep(0.1)
+            else:
+                time.sleep(0.1 - operation_time)
 
         dataframe = pd.DataFrame(values, columns=header)
         dataframe.to_csv('ten_hz.csv', columns=header, index=False)
