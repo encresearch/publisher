@@ -30,36 +30,36 @@ different chosen intervals (1Hz, 10Hz and 100Hz)"""
 
 #Function reads all channels from first two (0, 1) adc's at 10Hz
 def read_ten_hz():
-	while True:
-		header = ['adc', 'channel', 'time_stamp', 'value']
-		values = np.array([0, 0, np.datetime64(datetime.now()), 0])
-		for i in range(600):
-			#Time measurement to know how long this procedure takes
-			now = time.time()
+    while True:
+        header = ['adc', 'channel', 'time_stamp', 'value']
+        values = np.array([0, 0, np.datetime64(datetime.now()), 0])
+        for i in range(600):
+            #Time measurement to know how long this procedure takes
+            now = time.time()
 
-			newrow00 = np.array([0, 0, np.datetime64(datetime.now()), adc0.read_adc(0, gain=GAIN)])
-			newrow01 = np.array([0, 1, np.datetime64(datetime.now()), adc0.read_adc(1, gain=GAIN)])
-			newrow02 = np.array([0, 2, np.datetime64(datetime.now()), adc0.read_adc(2, gain=GAIN)])
-			newrow03 = np.array([0, 3, np.datetime64(datetime.now()), adc0.read_adc(3, gain=GAIN)])
-			newrow10 = np.array([1, 0, np.datetime64(datetime.now()), adc1.read_adc(0, gain=GAIN)])
-			newrow11 = np.array([1, 1, np.datetime64(datetime.now()), adc1.read_adc(1, gain=GAIN)])
-			newrow12 = np.array([1, 2, np.datetime64(datetime.now()), adc1.read_adc(2, gain=GAIN)])
-			newrow13 = np.array([1, 3, np.datetime64(datetime.now()), adc1.read_adc(3, gain=GAIN)])
-			values = np.vstack((values, newrow00))
-			values = np.vstack((values, newrow01))
-			values = np.vstack((values, newrow02))
-			values = np.vstack((values, newrow03))
-			values = np.vstack((values, newrow10))
-			values = np.vstack((values, newrow11))
-			values = np.vstack((values, newrow12))
-			values = np.vstack((values, newrow13))
+            newrow00 = np.array([0, 0, np.datetime64(datetime.now()), adc0.read_adc(0, gain=GAIN)])
+            newrow01 = np.array([0, 1, np.datetime64(datetime.now()), adc0.read_adc(1, gain=GAIN)])
+            newrow02 = np.array([0, 2, np.datetime64(datetime.now()), adc0.read_adc(2, gain=GAIN)])
+            newrow03 = np.array([0, 3, np.datetime64(datetime.now()), adc0.read_adc(3, gain=GAIN)])
+            newrow10 = np.array([1, 0, np.datetime64(datetime.now()), adc1.read_adc(0, gain=GAIN)])
+            newrow11 = np.array([1, 1, np.datetime64(datetime.now()), adc1.read_adc(1, gain=GAIN)])
+            newrow12 = np.array([1, 2, np.datetime64(datetime.now()), adc1.read_adc(2, gain=GAIN)])
+            newrow13 = np.array([1, 3, np.datetime64(datetime.now()), adc1.read_adc(3, gain=GAIN)])
+            values = np.vstack((values, newrow00))
+            values = np.vstack((values, newrow01))
+            values = np.vstack((values, newrow02))
+            values = np.vstack((values, newrow03))
+            values = np.vstack((values, newrow10))
+            values = np.vstack((values, newrow11))
+            values = np.vstack((values, newrow12))
+            values = np.vstack((values, newrow13))
 
-			print(time.time() - now)
+            print(time.time() - now)
 
-			time.sleep(0.1)
+            time.sleep(0.1)
 
         dataframe = pd.DataFrame(values, columns=header)
-		dataframe.to_csv('ten_hz.csv', columns=header, index=False)
+        dataframe.to_csv('ten_hz.csv', columns=header, index=False)
 read_ten_hz()
 
 #Creation of threads to run in parallel
