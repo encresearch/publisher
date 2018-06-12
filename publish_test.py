@@ -33,7 +33,10 @@ def read_ten_hz():
 	while True:
 		header = ['adc', 'channel', 'time_stamp', 'value']
 		values = np.array([0, 0, np.datetime64(datetime.now()), 0])
-		for i in range(10):
+		for i in range(600):
+			#Time measurement to know how long this procedure takes
+			now = time.time()
+
 			newrow00 = np.array([0, 0, np.datetime64(datetime.now()), adc0.read_adc(0, gain=GAIN)])
 			newrow01 = np.array([0, 1, np.datetime64(datetime.now()), adc0.read_adc(1, gain=GAIN)])
 			newrow02 = np.array([0, 2, np.datetime64(datetime.now()), adc0.read_adc(2, gain=GAIN)])
@@ -47,12 +50,15 @@ def read_ten_hz():
 			values = np.vstack((values, newrow02))
 			values = np.vstack((values, newrow03))
 			values = np.vstack((values, newrow10))
-			np.vstack((values, newrow11))
-			np.vstack((values, newrow12))
-			np.vstack((values, newrow13))
+			values = np.vstack((values, newrow11))
+			values = np.vstack((values, newrow12))
+			values = np.vstack((values, newrow13))
+
+			print(time.time() - now)
+
 			time.sleep(0.1)
-			print(newrow00)
-                dataframe = pd.DataFrame(values, columns=header)
+
+        dataframe = pd.DataFrame(values, columns=header)
 		dataframe.to_csv('ten_hz.csv', columns=header, index=False)
 read_ten_hz()
 
