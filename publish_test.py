@@ -55,7 +55,10 @@ def read_ten_hz():
         dataframe.to_csv('ten_hz.csv', columns=header, index=False)
         f = open('ten_hz.csv')
         csv = f.read()
+        mqttc.loop_start()
         mqttc.publish("RasPi1/10Hz", csv, 2)
+        print("file sent")
+        mqttc.loop_stop()
 
 read_ten_hz()
 
