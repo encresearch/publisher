@@ -54,10 +54,10 @@ def read_ten_hz():
             values = np.vstack((values, newrow12))
             values = np.vstack((values, newrow13))
 
-            print(time.time() - now)
+            operation_time = time.time()-now
 
-            time.sleep(0.1)
-
+            time.sleep(0.1 - operation_time)
+            
         dataframe = pd.DataFrame(values, columns=header)
         dataframe.to_csv('ten_hz.csv', columns=header, index=False)
 read_ten_hz()
