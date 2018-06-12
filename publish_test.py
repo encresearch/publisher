@@ -57,9 +57,13 @@ def read_ten_hz():
             operation_time = time.time()-now
 
             time.sleep(0.1 - operation_time)
-            
+
         dataframe = pd.DataFrame(values, columns=header)
         dataframe.to_csv('ten_hz.csv', columns=header, index=False)
+        f = open('ten_hz.csv')
+        csv = f.read()
+        mqttc.publish("RasPi1/10Hz", csv, 2)
+
 read_ten_hz()
 
 #Creation of threads to run in parallel
