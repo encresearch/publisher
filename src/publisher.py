@@ -11,10 +11,21 @@ import pandas as pd
 import numpy as np
 import time
 
+broker = "35.237.36.219" # static IP of mosquitto broker
+port = 1883
+GAIN = 1 # We are going to use same gain for all of them
+
+# Function for callback
+def on_publish(client, userdata, result):
+    print("Data Published")
+    pass
+
 #create an mqtt client instance
-mqttc = mqtt.Client("python_pub")
-#connect to the Google Cloud Mosquitto broker
-mqttc.connect("35.237.36.219", 1883)
+client1 = mqtt.Client("ten_hz")
+#assign function callback
+client1.on_publish = on_publish
+#establish connection to the Mosquitto broker
+client1.connect(broker, port)
 
 # create three ADS115 instances 
 adc0 = Adafruit_ADS1x15.ADS1115(0x48) # ADR to GRN
@@ -23,7 +34,6 @@ adc2 = Adafruit_ADS1x15.ADS1115(0x4A) # ADR to SDA
 adc3 = Adafruit_ADS1x15.ADS1115(0x4B) # ADR to SCL
 
 
-GAIN = 1 # We are going to use same gain for all of them
 
 """Three different functions reading data at the three 
 different chosen intervals (1Hz, 10Hz and 100Hz)"""
@@ -55,28 +65,8 @@ def read_ten_hz():
         dataframe.to_csv('ten_hz.csv', columns=header, index=False)
         f = open('ten_hz.csv')
         csv = f.read()
-        mqttc.loop_start()
-        mqttc.publish("RasPi1/10Hz", csv, 2)
-        print("file sent")
-        mqttc.loop_stop()
+        client1.loop_start()
+        client1.publish("RasPi1/10Hz", csv, 2)
+        client1.loop_stop()
 
 read_ten_hz()
-
-#Creation of threads to run in parallel
-
-
-#Executing threads at same time
-
-"""while True:
-    # Read the specified ADC channel
-    value = adc0.read_adc(0, gain=GAIN)
-
-    print('Channel 0: {0}'.format(value))
-    
-    #Publish data to our broker
-    mqttc.publish("test/one", str(value))
-
-    # Sleep for half a second.
-    time.sleep(0.5)
-
-mqttc.loop_forever()"""
