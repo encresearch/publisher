@@ -1,4 +1,4 @@
-name: mqtt-client
+name: mqtt-publisher
 dependencies:
 - anaconda-client=1.0.2=py34_0
 - clyent=0.4.0=py34_0
