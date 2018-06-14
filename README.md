@@ -1,5 +1,6 @@
-# mqtt-clients [Work in Progress]
-Scripts for both publishing and subscribed clients
+# MQTT-Publisher-Sensors [Work in Progress]
+Raspian specific MQTT client publishing data acquired from several sensors
+ 
 
 ## Overview
-Data acquisition platform to gather sensor data at different time rates, send it to a "subscribed server" using an MQTT protocol, perform specific calculations/conversions and store it in a time-series InfluxDB database.
+Client side Data Acquisition Platform to gather sensor data at different time rates, and publish it to a subscribed server using the MQTT protocol.
