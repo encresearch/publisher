@@ -15,31 +15,26 @@ broker = "35.237.36.219" # static IP of mosquitto broker
 port = 1883
 GAIN = 1 # We are going to use same gain for all of them
 
-# Function for callback
-def on_publish(client, userdata, result):
-    print("Data Published")
-    pass
-
-#create an mqtt client instance
-client1 = mqtt.Client("ten_hz")
-#assign function callback
-client1.on_publish = on_publish
-#establish connection to the Mosquitto broker
-client1.connect(broker, port)
-
 # create three ADS115 instances 
 adc0 = Adafruit_ADS1x15.ADS1115(0x48) # ADR to GRN
 adc1 = Adafruit_ADS1x15.ADS1115(0x49) # ADR to VDD
 adc2 = Adafruit_ADS1x15.ADS1115(0x4A) # ADR to SDA
 adc3 = Adafruit_ADS1x15.ADS1115(0x4B) # ADR to SCL
 
-
-
-"""Three different functions reading data at the three 
-different chosen intervals (1Hz, 10Hz and 100Hz)"""
-
-#Function reads all channels from first two (0, 1) adc's at 10Hz
 def read_ten_hz():
+    """ 
+    Function that reads from all channels from first two (0, 1) adc's
+    ten times in a second, creates a numpy array which is then converted to a
+    panda's dataframe and into a CSV file and sent to the MQTT broker with the 
+    topic RasPi1/10Hz
+    """
+    client1 = mqtt.Client("ten_hz") #create an mqtt client instance
+    client1.on_publish = on_publish #assign function callback
+    client1.connect(broker, port) #establish connection to the Mosquitto broker
+    # Function for clients1's specific callback when pubslishing message
+    def on_publish(client, userdata, result):
+        print("Data Published")
+        pass
     while True:
         header = ['adc', 'channel', 'time_stamp', 'value']
         values = np.array([0, 0, np.datetime64(datetime.now()), 0])
@@ -69,4 +64,5 @@ def read_ten_hz():
         client1.publish("RasPi1/10Hz", csv, 2)
         client1.loop_stop()
 
-read_ten_hz()
+if __name__ == '__main__':
+    read_ten_hz()
