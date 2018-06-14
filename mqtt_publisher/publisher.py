@@ -15,7 +15,7 @@ broker = "35.237.36.219" # static IP of mosquitto broker
 port = 1883
 GAIN = 1 # We are going to use same gain for all of them
 
-# create three ADS115 instances 
+# create four ADS115 instances 
 adc0 = Adafruit_ADS1x15.ADS1115(0x48) # ADR to GRN
 adc1 = Adafruit_ADS1x15.ADS1115(0x49) # ADR to VDD
 adc2 = Adafruit_ADS1x15.ADS1115(0x4A) # ADR to SDA
@@ -23,25 +23,22 @@ adc3 = Adafruit_ADS1x15.ADS1115(0x4B) # ADR to SCL
 
 def read_ten_hz():
     """ 
-    Function that reads from all channels from first two (0, 1) adc's
-    ten times in a second, creates a numpy array which is then converted to a
-    panda's dataframe and into a CSV file and sent to the MQTT broker with the 
-    topic RasPi1/10Hz
+    Reads from all channels from first two (0, 1) adc's ten times in a second, 
+    creates a numpy array which is then converted to a panda's dataframe and into a CSV file
+    and sent to the MQTT broker with topic RasPi1/10Hz
     """
+    def on_publish(client, userdata, result):
+        # Function for clients1's specific callback when pubslishing message
+        print("Data Published")
+        pass
+    headers = ['adc', 'channel', 'time_stamp', 'value'] # Headers of the upcoming csv file
     client1 = mqtt.Client("ten_hz") #create an mqtt client instance
     client1.on_publish = on_publish #assign function callback
     client1.connect(broker, port) #establish connection to the Mosquitto broker
-    # Function for clients1's specific callback when pubslishing message
-    def on_publish(client, userdata, result):
-        print("Data Published")
-        pass
     while True:
-        header = ['adc', 'channel', 'time_stamp', 'value']
-        values = np.array([0, 0, np.datetime64(datetime.now()), 0])
-        for i in range(600):
-            #Time measurement to know how long this procedure takes
-            now = time.time()
-
+        values = np.empty((0, 4)) #create an empty array with 4 'columns'
+        for _ in range(600): # The following should be repeated 600 times to complete a minute
+            now = time.time() #Time measurement to know how long this procedure takes
             values = np.vstack((values, np.array([0, 0, np.datetime64(datetime.now()), adc0.read_adc(0, gain=GAIN)])))
             values = np.vstack((values, np.array([0, 1, np.datetime64(datetime.now()), adc0.read_adc(1, gain=GAIN)])))
             values = np.vstack((values, np.array([0, 2, np.datetime64(datetime.now()), adc0.read_adc(2, gain=GAIN)])))
@@ -50,14 +47,11 @@ def read_ten_hz():
             values = np.vstack((values, np.array([1, 1, np.datetime64(datetime.now()), adc1.read_adc(1, gain=GAIN)])))
             values = np.vstack((values, np.array([1, 2, np.datetime64(datetime.now()), adc1.read_adc(2, gain=GAIN)])))
             values = np.vstack((values, np.array([1, 3, np.datetime64(datetime.now()), adc1.read_adc(3, gain=GAIN)])))
-
             operation_time = time.time()-now
-
             if operation_time < 0.1:
                 time.sleep(0.1 - operation_time)
-                
-        dataframe = pd.DataFrame(values, columns=header)
-        dataframe.to_csv('ten_hz.csv', columns=header, index=False)
+        dataframe = pd.DataFrame(values, columns=headers)
+        dataframe.to_csv('ten_hz.csv', columns=headers, index=False)
         f = open('ten_hz.csv')
         csv = f.read()
         client1.loop_start()
