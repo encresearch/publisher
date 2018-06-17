@@ -39,14 +39,14 @@ def read_ten_hz():
         values = np.empty((0, 4)) #create an empty array with 4 'columns'
         for _ in range(600): # The following should be repeated 600 times to complete a minute
             now = time.time() #Time measurement to know how long this procedure takes
-            values = np.vstack((values, np.array([0, 0, np.datetime64(datetime.now()), adc0.read_adc(0, gain=GAIN)])))
-            values = np.vstack((values, np.array([0, 1, np.datetime64(datetime.now()), adc0.read_adc(1, gain=GAIN)])))
-            values = np.vstack((values, np.array([0, 2, np.datetime64(datetime.now()), adc0.read_adc(2, gain=GAIN)])))
-            values = np.vstack((values, np.array([0, 3, np.datetime64(datetime.now()), adc0.read_adc(3, gain=GAIN)])))
-            values = np.vstack((values, np.array([1, 0, np.datetime64(datetime.now()), adc1.read_adc(0, gain=GAIN)])))
-            values = np.vstack((values, np.array([1, 1, np.datetime64(datetime.now()), adc1.read_adc(1, gain=GAIN)])))
-            values = np.vstack((values, np.array([1, 2, np.datetime64(datetime.now()), adc1.read_adc(2, gain=GAIN)])))
-            values = np.vstack((values, np.array([1, 3, np.datetime64(datetime.now()), adc1.read_adc(3, gain=GAIN)])))
+            values = np.vstack((values, np.array([1, 1, datetime.now(), adc0.read_adc(0, gain=GAIN)])))
+            values = np.vstack((values, np.array([1, 2, datetime.now(), adc0.read_adc(1, gain=GAIN)])))
+            values = np.vstack((values, np.array([1, 3, datetime.now(), adc0.read_adc(2, gain=GAIN)])))
+            values = np.vstack((values, np.array([1, 4, datetime.now(), adc0.read_adc(3, gain=GAIN)])))
+            values = np.vstack((values, np.array([2, 1, datetime.now(), adc1.read_adc(0, gain=GAIN)])))
+            values = np.vstack((values, np.array([2, 2, datetime.now(), adc1.read_adc(1, gain=GAIN)])))
+            values = np.vstack((values, np.array([2, 3, datetime.now(), adc1.read_adc(2, gain=GAIN)])))
+            values = np.vstack((values, np.array([2, 4, datetime.now(), adc1.read_adc(3, gain=GAIN)])))
             operation_time = time.time()-now
             if operation_time < 0.1:
                 time.sleep(0.1 - operation_time)
