@@ -47,7 +47,7 @@ def read_ten_hz():
         print("Data Published")
         pass
       
-    client, connection = connect_to_broker(client_id=client_id, host=host, port=port, keepalive=keepalive, on_connect=on_connect, on_publish=on_message)
+    client, connection = connect_to_broker(client_id=client_id, host=host, port=port, keepalive=keepalive, on_connect=on_connect, on_publish=on_publish)
     
     client.loop_start()
 
