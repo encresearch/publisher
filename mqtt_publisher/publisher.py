@@ -15,10 +15,10 @@ import time
 # based on the connection of the ADR (address) pin
 # Data Rate samples are chosen based on the frequency we want to pull data
 # from it. data_rate indicates the time it will take in measuring the analog data
-adc0 = Adafruit_ADS1x15.ADS1115(address=0x48, data_rate=250) # ADR to GRN | Will do 10Hz readings
-adc1 = Adafruit_ADS1x15.ADS1115(address=0x49, data_rate=250) # ADR to VDD | Will do 10Hz readings
-adc2 = Adafruit_ADS1x15.ADS1115(address=0x4A, data_rate=128) # ADR to SDA | Will do 1Hz readings
-adc3 = Adafruit_ADS1x15.ADS1115(address=0x4B, data_rate=475) # ADR to SCL | Will do 100Hz readings
+adc0 = Adafruit_ADS1x15.ADS1115(address=0x48) # ADR to GRN | Will do 10Hz readings
+adc1 = Adafruit_ADS1x15.ADS1115(address=0x49) # ADR to VDD | Will do 10Hz readings
+adc2 = Adafruit_ADS1x15.ADS1115(address=0x4A) # ADR to SDA | Will do 1Hz readings
+adc3 = Adafruit_ADS1x15.ADS1115(address=0x4B) # ADR to SCL | Will do 100Hz readings
 
 def connect_to_broker(client_id, host, port, keepalive, on_connect, on_publish):
     # Params -> Client(client_id=””, clean_session=True, userdata=None, protocol=MQTTv311, transport=”tcp”)
@@ -41,7 +41,7 @@ def read_ten_hz():
     keepalive = 30
     GAIN = 1 # We are going to use same gain for all of them
     headers = ['adc', 'channel', 'time_stamp', 'value'] # Headers of the upcoming csv file
-
+    data_rate = 250
     def on_connect(client, userdata, flags, rc):
         pass
 
@@ -56,17 +56,16 @@ def read_ten_hz():
 
     while True:
         values = np.empty((0, 4)) #create an empty array with 4 'columns'
-        values = np.vstack((values, np.array([3, 1, ])))
         for _ in range(600): # The following should be repeated 600 times to complete a minute
             now = time.time() #Time measurement to know how long this procedure takes
-            values = np.vstack((values, np.array([1, 1, datetime.now(), adc0.read_adc(0, gain=GAIN)])))
-            values = np.vstack((values, np.array([1, 2, datetime.now(), adc0.read_adc(1, gain=GAIN)])))
-            values = np.vstack((values, np.array([1, 3, datetime.now(), adc0.read_adc(2, gain=GAIN)])))
-            values = np.vstack((values, np.array([1, 4, datetime.now(), adc0.read_adc(3, gain=GAIN)])))
-            values = np.vstack((values, np.array([2, 1, datetime.now(), adc1.read_adc(0, gain=GAIN)])))
-            values = np.vstack((values, np.array([2, 2, datetime.now(), adc1.read_adc(1, gain=GAIN)])))
-            values = np.vstack((values, np.array([2, 3, datetime.now(), adc1.read_adc(2, gain=GAIN)])))
-            values = np.vstack((values, np.array([2, 4, datetime.now(), adc1.read_adc(3, gain=GAIN)])))
+            values = np.vstack((values, np.array([1, 1, datetime.now(), adc0.read_adc(0, gain=GAIN, data_rate=data_rate)])))
+            values = np.vstack((values, np.array([1, 2, datetime.now(), adc0.read_adc(1, gain=GAIN, data_rate=data_rate)])))
+            values = np.vstack((values, np.array([1, 3, datetime.now(), adc0.read_adc(2, gain=GAIN, data_rate=data_rate)])))
+            values = np.vstack((values, np.array([1, 4, datetime.now(), adc0.read_adc(3, gain=GAIN, data_rate=data_rate)])))
+            values = np.vstack((values, np.array([2, 1, datetime.now(), adc1.read_adc(0, gain=GAIN, data_rate=data_rate)])))
+            values = np.vstack((values, np.array([2, 2, datetime.now(), adc1.read_adc(1, gain=GAIN, data_rate=data_rate)])))
+            values = np.vstack((values, np.array([2, 3, datetime.now(), adc1.read_adc(2, gain=GAIN, data_rate=data_rate)])))
+            values = np.vstack((values, np.array([2, 4, datetime.now(), adc1.read_adc(3, gain=GAIN, data_rate=data_rate)])))
             operation_time = time.time()-now
             if operation_time < 0.1:
                 time.sleep(0.1 - operation_time)
@@ -76,7 +75,7 @@ def read_ten_hz():
         csv = f.read()
         client.publish("RasPi1/10Hz", csv, 2)
 
-def read_one_hundres_hz():
+def read_one_hundred_hz():
     """ 
     Reads channels from last two ADCs at a 1Hz rate, except for the last channel (A3)
     of the last ADC (adc3) which is read at 100Hz
@@ -104,16 +103,16 @@ def read_one_hundres_hz():
         #create an empty array with 4 'columns'
         values = np.empty((0, 4))
         # Make one reading of all 1Hz channels on ADCs 2 and 3
-        values = np.vstack((values, np.array([3, 1, datetime.now(), adc2.read_adc(0, gain=GAIN)])))
-        values = np.vstack((values, np.array([3, 2, datetime.now(), adc2.read_adc(1, gain=GAIN)])))
-        values = np.vstack((values, np.array([3, 3, datetime.now(), adc2.read_adc(2, gain=GAIN)])))
-        values = np.vstack((values, np.array([3, 4, datetime.now(), adc2.read_adc(3, gain=GAIN)])))
-        values = np.vstack((values, np.array([4, 1, datetime.now(), adc3.read_adc(0, gain=GAIN)])))
-        values = np.vstack((values, np.array([4, 2, datetime.now(), adc3.read_adc(1, gain=GAIN)])))
-        values = np.vstack((values, np.array([4, 3, datetime.now(), adc3.read_adc(2, gain=GAIN)])))
+        values = np.vstack((values, np.array([3, 1, datetime.now(), adc2.read_adc(0, gain=GAIN, data_rate=128)])))
+        values = np.vstack((values, np.array([3, 2, datetime.now(), adc2.read_adc(1, gain=GAIN, data_rate=128)])))
+        values = np.vstack((values, np.array([3, 3, datetime.now(), adc2.read_adc(2, gain=GAIN, data_rate=128)])))
+        values = np.vstack((values, np.array([3, 4, datetime.now(), adc2.read_adc(3, gain=GAIN, data_rate=128)])))
+        values = np.vstack((values, np.array([4, 1, datetime.now(), adc3.read_adc(0, gain=GAIN, data_rate=128)])))
+        values = np.vstack((values, np.array([4, 2, datetime.now(), adc3.read_adc(1, gain=GAIN, data_rate=128)])))
+        values = np.vstack((values, np.array([4, 3, datetime.now(), adc3.read_adc(2, gain=GAIN, data_rate=128)])))
         for _ in range(6000): # The following should be repeated 6000 times to complete a minute
             now = time.time() #Time measurement to know how long this procedure takes
-            values = np.vstack((values, np.array([4, 4, datetime.now(), adc3.read_adc(4, gain=GAIN)])))
+            values = np.vstack((values, np.array([4, 4, datetime.now(), adc3.read_adc(3, gain=GAIN, data_rate=475)])))
             operation_time = time.time()-now
             if operation_time < 0.01:
                 time.sleep(0.01 - operation_time)
@@ -124,7 +123,7 @@ def read_one_hundres_hz():
         client.publish("RasPi1/100Hz", csv, 2)
 
 def main():
-    read_ten_hz()
+    read_one_hundred_hz()
 
 if __name__ == '__main__':
     main()
