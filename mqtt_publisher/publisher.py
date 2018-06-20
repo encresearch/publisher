@@ -10,6 +10,7 @@ import paho.mqtt.client as mqtt
 import pandas as pd
 import numpy as np
 import time
+from multiprocessing import Process
 
 # create four ADS115 instances with different addresses
 # based on the connection of the ADR (address) pin
@@ -122,8 +123,8 @@ def read_one_hundred_hz():
         csv = f.read()
         client.publish("RasPi1/100Hz", csv, 2)
 
-def main():
-    read_one_hundred_hz()
-
 if __name__ == '__main__':
-    main()
+    p_ten_hz = Process(target=read_ten_hz)
+    p_hundred_hz = Process(target=read_one_hundred_hz)
+    p_ten_hz.start()
+    p_hundred_hz.start()
