@@ -103,20 +103,21 @@ def read_one_hundred_hz():
     while True:
         #create an empty array with 4 'columns'
         values = np.empty((0, 4))
-        # Make one reading of all 1Hz channels on ADCs 2 and 3
-        values = np.vstack((values, np.array([3, 1, datetime.now(), adc2.read_adc(0, gain=GAIN, data_rate=128)])))
-        values = np.vstack((values, np.array([3, 2, datetime.now(), adc2.read_adc(1, gain=GAIN, data_rate=128)])))
-        values = np.vstack((values, np.array([3, 3, datetime.now(), adc2.read_adc(2, gain=GAIN, data_rate=128)])))
-        values = np.vstack((values, np.array([3, 4, datetime.now(), adc2.read_adc(3, gain=GAIN, data_rate=128)])))
-        values = np.vstack((values, np.array([4, 1, datetime.now(), adc3.read_adc(0, gain=GAIN, data_rate=128)])))
-        values = np.vstack((values, np.array([4, 2, datetime.now(), adc3.read_adc(1, gain=GAIN, data_rate=128)])))
-        values = np.vstack((values, np.array([4, 3, datetime.now(), adc3.read_adc(2, gain=GAIN, data_rate=128)])))
-        for _ in range(6000): # The following should be repeated 6000 times to complete a minute
-            now = time.time() #Time measurement to know how long this procedure takes
-            values = np.vstack((values, np.array([4, 4, datetime.now(), adc3.read_adc(3, gain=GAIN, data_rate=475)])))
-            operation_time = time.time()-now
-            if operation_time < 0.01:
-                time.sleep(0.01 - operation_time)
+        for _ in range(60): # makes 60 loops, assuming the whole operation above takes ~1 second
+            # Make one reading of all 1Hz channels on ADCs 2 and 3
+            values = np.vstack((values, np.array([3, 1, datetime.now(), adc2.read_adc(0, gain=GAIN, data_rate=475)])))
+            values = np.vstack((values, np.array([3, 2, datetime.now(), adc2.read_adc(1, gain=GAIN, data_rate=475)])))
+            values = np.vstack((values, np.array([3, 3, datetime.now(), adc2.read_adc(2, gain=GAIN, data_rate=475)])))
+            values = np.vstack((values, np.array([3, 4, datetime.now(), adc2.read_adc(3, gain=GAIN, data_rate=475)])))
+            values = np.vstack((values, np.array([4, 1, datetime.now(), adc3.read_adc(0, gain=GAIN, data_rate=475)])))
+            values = np.vstack((values, np.array([4, 2, datetime.now(), adc3.read_adc(1, gain=GAIN, data_rate=475)])))
+            values = np.vstack((values, np.array([4, 3, datetime.now(), adc3.read_adc(2, gain=GAIN, data_rate=475)])))
+            for _ in range(100): # The following should be repeated 100 times to complete a second
+                now = time.time() #Time measurement to know how long this procedure takes
+                values = np.vstack((values, np.array([4, 4, datetime.now(), adc3.read_adc(3, gain=GAIN, data_rate=475)])))
+                operation_time = time.time()-now
+                if operation_time < 0.01:
+                    time.sleep(0.01 - operation_time)
         dataframe = pd.DataFrame(values, columns=headers)
         dataframe.to_csv('hundred_hz.csv', columns=headers, index=False)
         f = open('hundred_hz.csv')
