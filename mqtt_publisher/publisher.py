@@ -1,7 +1,8 @@
-"""This script reads from different ADC inputs at three established frequencies,
-stores that data in three different files (one for each frequency)
-and sends the three files over to the Mosquitto server, each one published 
-at a different topic ('RasPi1/1Hz',' RasPi1/10Hz', 'RasPi1/100Hz')
+"""
+This script reads from different Analog to Digital Converters (ADC) 
+inputs at three established frequencies. It runs two processes at the same time.
+They collect data from the first two, and last two ADCs respectively, writes it to a
+CSV file, and then sends it to a Mosquitto broker on the cloud
 """
 
 from datetime import datetime
@@ -40,6 +41,7 @@ def read_ten_hz():
     host = "35.237.36.219" # static IP of mosquitto broker
     port = 1883
     keepalive = 30
+    topic = "usa/quincy/1"
     GAIN = 1 # We are going to use same gain for all of them
     headers = ['adc', 'channel', 'time_stamp', 'value'] # Headers of the upcoming csv file
     data_rate = 475
@@ -74,7 +76,7 @@ def read_ten_hz():
         dataframe.to_csv('ten_hz.csv', columns=headers, index=False)
         f = open('ten_hz.csv')
         csv = f.read()
-        client.publish("RasPi1/10Hz", csv, 2)
+        client.publish(topic, csv, 2)
 
 def read_one_hundred_hz():
     """ 
@@ -85,6 +87,7 @@ def read_one_hundred_hz():
     host = "35.237.36.219" # static IP of mosquitto broker
     port = 1883
     keepalive = 30
+    topic = "usa/quincy/1"
     GAIN = 1 # We are going to use same gain for all of them
     headers = ['adc', 'channel', 'time_stamp', 'value'] # Headers of the upcoming csv file
     data_rate = 860
@@ -123,7 +126,7 @@ def read_one_hundred_hz():
         dataframe.to_csv('hundred_hz.csv', columns=headers, index=False)
         f = open('hundred_hz.csv')
         csv = f.read()
-        client.publish("RasPi1/100Hz", csv, 2)
+        client.publish(topic, csv, 2)
 
 if __name__ == '__main__':
     p_ten_hz = Process(target=read_ten_hz)
