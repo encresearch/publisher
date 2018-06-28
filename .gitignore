@@ -2,3 +2,4 @@ venv/
 *.pyc
 *.csv
 __pycache__/
+settings.json
