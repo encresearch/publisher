@@ -17,7 +17,7 @@ The Adafruit ADS1115 uses the I2C bus to communicate. This protocol needs just t
 
 For a complete setup of four ADS1115 units with different address, connect as below:
 
-[[https://github.com/encresearch/mqtt-publisher/blob/master/docs/images/ads_raspi_wiring.jpg|alt=wiring]]
+![ADS1115 Wiring Diagram](https://github.com/encresearch/mqtt-publisher/blob/master/docs/images/ads_raspi_wiring.jpg)
 
 In this example diagram, an Arduino board is being used. To setup this architecture in a Raspberry Pi 3, just connect it to the correct GPIO pins on the board. For more information about the Raspberry Pi GPIO, visit [here](https://www.raspberrypi.org/documentation/usage/gpio/).
 
