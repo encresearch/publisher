@@ -16,7 +16,9 @@ The Adafruit ADS1115 uses the I2C bus to communicate. This protocol needs just t
 * 0x4B (1001011) ADR -> SCL
 
 For a complete setup of four ADS1115 units with different address, connect as below:
+
 ![ADS1115 Wiring Diagram](docs/images/ads_raspi_wiring.jpg)
+
 In this example diagram, an Arduino board is being used. To setup this architecture in a Raspberry Pi 3, just connect it to the correct GPIO pins on the board. For more information about the Raspberry Pi GPIO, visit [here](https://www.raspberrypi.org/documentation/usage/gpio/).
 
 ## Dependencies and Setup
@@ -26,7 +28,9 @@ The dependencies can be met either by cloning into the project and setting up a 
 
 Install Miniconda
 ```sudo apt-get update && wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh```
+
 ```sudo md5sum Miniconda3-latest-Linux-armv7l.sh```
+
 ```sudo /bin/bash Miniconda3-latest-Linux-armv7l.sh```
 
 Change the default installation directory to ```/home/pi/miniconda3```
