@@ -59,7 +59,7 @@ Run docker-compose
 ```docker-compose -f docker-compose.yml up -d```
 
 To stop and remove containers, networks and images created by up. (External volumes won't be removed)
-```docker-compose -f docker-compose.dev.yml down```
+```docker-compose -f docker-compose.yml down```
 
 ## Contributing
 Pull requests and stars are always welcome. To contribute, please fetch, [create an issue](https://github.com/encresearch/data-assimilation/issues) explaining the bug or feature request, create a branch off this issue and submit a pull request.
