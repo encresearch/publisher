@@ -53,7 +53,7 @@ Activate the environment
 To run, cd into ```mqtt_publisher/``` and execute the python file
 ```python publisher.py```
 
-### Install and run with Docker + Telegraf
+### Install and run with Docker + Telegraf [NOT YET AVAILABLE]
 
 Install [Docker](https://docs.docker.com/install/) 
 
