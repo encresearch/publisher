@@ -66,4 +66,4 @@ To stop and remove containers, networks and images created by up. (External volu
 ```docker-compose -f docker-compose.yml down```
 
 ## Contributing
-Pull requests and stars are always welcome. To contribute, please fetch, [create an issue](https://github.com/encresearch/data-assimilation/issues) explaining the bug or feature request, create a branch off this issue and submit a pull request.
+Pull requests and stars are always welcome. To contribute, create a descriptive branch off of master (ex ```data-migration-tests```), commit to it, and submit a pull request.
