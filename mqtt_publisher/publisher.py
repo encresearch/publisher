@@ -2,7 +2,23 @@
 This script reads from different Analog to Digital Converters (ADC) 
 inputs at three established frequencies. It runs two processes at the same time.
 They collect data from the first two, and last two ADCs respectively, writes it to a
-CSV file, and then sends it to a Mosquitto broker on the cloud
+CSV file, and then sends it to a Mosquitto broker on the cloud.
+
+The devices' GAIN was chosen to be 1. Since this is a 16 bits device, the measured
+voltage will depend on the programmable GAIN. The following table shows the possible
+reading range per chosen GAIN. A GAIN of 1 goes from -4.096V to 4.096V.
+- 2/3 = +/-6.144V
+-   1 = +/-4.096V
+-   2 = +/-2.048V
+-   4 = +/-1.024V
+-   8 = +/-0.512V
+-  16 = +/-0.256V
+
+This means that the maximum range of this 16 bits device is +/-32767.
+Thus, to convert bits to V, we divide 4.096 by 32767,
+which gives us 0.000125. In conclusion, to convert this readings to mV
+we just need to multiply the output times 0.125, which is done in the server
+side (mqtt-connector) to prevent time delays.
 """
 
 from datetime import datetime
@@ -116,6 +132,7 @@ def read_one_hundred_hz():
             values = np.vstack((values, np.array([4, 1, datetime.now(), adc3.read_adc(0, gain=GAIN, data_rate=data_rate)])))
             values = np.vstack((values, np.array([4, 2, datetime.now(), adc3.read_adc(1, gain=GAIN, data_rate=data_rate)])))
             values = np.vstack((values, np.array([4, 3, datetime.now(), adc3.read_adc(2, gain=GAIN, data_rate=data_rate)])))
+            # Reads from 4th pin on adc3 @ 100Hz... 
             for _ in range(100): # The following should be repeated 100 times to complete a second
                 now = time.time() #Time measurement to know how long this procedure takes
                 values = np.vstack((values, np.array([4, 4, datetime.now(), adc3.read_adc(3, gain=GAIN, data_rate=860)])))
