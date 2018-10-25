@@ -1,0 +1,19 @@
+version: '3.1'
+
+services:
+  publisher:
+      container_name: publisher
+      build: .
+      volumes:
+        - ./mqtt_publisher:/app
+      environment:
+        - TOPIC # Set the environment variable before deployment
+      devices: # Gives access to the gpio pins
+      - /dev/gpiomem:/dev/gpiomem
+
+  watchtower: # checks for changes in any of the installed images (on the latest tag)
+    image: v2tec/watchtower:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # mounts docker socket to interact with Docker's API
+    command: --interval 300 # Checks for changes every 5 minutes
+    restart: unless-stopped
