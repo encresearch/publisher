@@ -1,0 +1,33 @@
+version: '3.1'
+
+services:
+  publisher:
+      container_name: publisher
+      build: .
+      volumes:
+        - ./mqtt_publisher:/app
+
+# TODO
+# Configuration example for future telegraf plugin
+#  telegraf: # Sends metric reports about the host
+#    container_name: telegraf
+#    image: telegraf
+#    environment:
+#      HOST_PROC: /rootfs/proc
+#      HOST_SYS: /rootfs/sys
+#      HOST_ETC: /rootfs/etc
+#    hostname: dev-server
+#    volumes:
+#      - ./etc/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+#      - /var/run/docker.sock:/var/run/docker.sock:ro
+#      - /sys:/rootfs/sys:ro
+#      - /proc:/rootfs/proc:ro
+#      - /etc:/rootfs/etc:ro
+#    restart: unless-stopped
+
+  watchtower: # checks for changes in any of the installed images (on the latest tag)
+    image: v2tec/watchtower:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # mounts docker socket to interact with Docker's API
+    command: --interval 300 # Checks for changes every 5 minutes
+    restart: unless-stopped

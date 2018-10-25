@@ -27,7 +27,15 @@ import paho.mqtt.client as mqtt
 import pandas as pd
 import numpy as np
 import time
+import os
 from multiprocessing import Process
+
+HOST = "35.237.36.219" # static IP of mosquitto broker
+PORT = 1883
+KEEPALIVE = 30
+TOPIC = os.getenv("TOPIC", "usa/quincy/1") # defaults to $("usa/quincy/1")
+GAIN = 1
+HEADERS = ['adc', 'channel', 'time_stamp', 'value'] # Headers of the upcoming csv file
 
 # create four ADS115 instances with different addresses
 # based on the connection of the ADR (address) pin
@@ -53,14 +61,9 @@ def read_ten_hz():
     creates a numpy array which is then converted to a panda's dataframe and into a CSV file
     and sent to the MQTT broker with topic RasPi1/10Hz
     """
-    client_id = "TEN_HZ"
-    host = "35.237.36.219" # static IP of mosquitto broker
-    port = 1883
-    keepalive = 30
-    topic = "usa/quincy/1"
-    GAIN = 1 # We are going to use same gain for all of them
-    headers = ['adc', 'channel', 'time_stamp', 'value'] # Headers of the upcoming csv file
+    client_id = "{0}".format("/TEN_HZ") # <country>/<city>/<device_num>/<reading_type>
     data_rate = 475
+
     def on_connect(client, userdata, flags, rc):
         pass
 
@@ -69,7 +72,7 @@ def read_ten_hz():
         print("Data 10hz Published")
         pass
       
-    client, connection = connect_to_broker(client_id=client_id, host=host, port=port, keepalive=keepalive, on_connect=on_connect, on_publish=on_publish)
+    client, connection = connect_to_broker(client_id=client_id, host=HOST, port=PORT, keepalive=KEEPALIVE, on_connect=on_connect, on_publish=on_publish)
     
     client.loop_start()
 
@@ -88,25 +91,19 @@ def read_ten_hz():
             operation_time = time.time()-now
             if operation_time < 0.1:
                 time.sleep(0.1 - operation_time)
-        dataframe = pd.DataFrame(values, columns=headers)
-        dataframe.to_csv('ten_hz.csv', columns=headers, index=False)
+        dataframe = pd.DataFrame(values, columns=HEADERS)
+        dataframe.to_csv('ten_hz.csv', columns=HEADERS, index=False)
         f = open('ten_hz.csv')
         csv = f.read()
-        client.publish(topic, csv, 2)
+        client.publish(TOPIC, csv, 2)
 
 def read_one_hundred_hz():
     """ 
     Reads channels from last two ADCs at a 1Hz rate, except for the last channel (A3)
     of the last ADC (adc3) which is read at 100Hz
     """
-    client_id = "ONE_HUNDRED_HZ" #Different id from the first function
-    host = "35.237.36.219" # static IP of mosquitto broker
-    port = 1883
-    keepalive = 30
-    topic = "usa/quincy/1"
-    GAIN = 1 # We are going to use same gain for all of them
-    headers = ['adc', 'channel', 'time_stamp', 'value'] # Headers of the upcoming csv file
-    data_rate = 860
+    client_id = "{0}".format("/ONE_HUNDRED_HZ") # <country>/<city>/<device_num>/<reading_type>
+    data_rate = 860 # Also different from the first function
 
     def on_connect(client, userdata, flags, rc):
         pass
@@ -116,7 +113,7 @@ def read_one_hundred_hz():
         print("Data one/hundred Published")
         pass
       
-    client, connection = connect_to_broker(client_id=client_id, host=host, port=port, keepalive=keepalive, on_connect=on_connect, on_publish=on_publish)
+    client, connection = connect_to_broker(client_id=client_id, host=HOST, port=PORT, keepalive=KEEPALIVE, on_connect=on_connect, on_publish=on_publish)
     
     client.loop_start()
 
@@ -139,11 +136,11 @@ def read_one_hundred_hz():
                 operation_time = time.time()-now
                 if operation_time < 0.01:
                     time.sleep(0.01 - operation_time)
-        dataframe = pd.DataFrame(values, columns=headers)
-        dataframe.to_csv('hundred_hz.csv', columns=headers, index=False)
+        dataframe = pd.DataFrame(values, columns=HEADERS)
+        dataframe.to_csv('hundred_hz.csv', columns=HEADERS, index=False)
         f = open('hundred_hz.csv')
         csv = f.read()
-        client.publish(topic, csv, 2)
+        client.publish(TOPIC, csv, 2)
 
 if __name__ == '__main__':
     p_ten_hz = Process(target=read_ten_hz)
