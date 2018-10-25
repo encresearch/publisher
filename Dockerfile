@@ -9,7 +9,7 @@ COPY environment.yml /
 ENV PATH /opt/conda/bin:$PATH
 
 RUN apt-get update \
-    && wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-arm32v7.sh -O ~/miniconda.sh \
+    && wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-armv7l.sh -O ~/miniconda.sh \
     && md5sum ~/miniconda.sh \
     && /bin/bash ~/miniconda.sh -b -p /opt/conda \
     && rm ~/miniconda.sh \
