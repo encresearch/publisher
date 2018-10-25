@@ -6,15 +6,17 @@ LABEL Name="mqtt-publisher Version=0.0.1"
 
 COPY environment.yml /
 
+ENV PATH /opt/conda/bin:$PATH
+
 RUN apt-get update \
-    && md5sum Miniconda3-latest-Linux-armv7l.sh \
-    && /bin/bash Miniconda3-latest-Linux-armv7l.sh \
+    && wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-arm32v7.sh -O ~/miniconda.sh \
+    && md5sum ~/miniconda.sh \
+    && /bin/bash ~/miniconda.sh -b -p /opt/conda \
+    && rm ~/miniconda.sh \
     && conda update conda \
     && apt-get autoremove \
     && apt-get autoclean \
-    && conda clean --all --yes
-
-ENV PATH /opt/conda/bin:$PATH
+    && conda clean -y --source --tarballs --packages
 
 # Create conda environment based on yaml file
 RUN conda env create -f environment.yml

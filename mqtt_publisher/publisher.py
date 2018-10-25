@@ -33,7 +33,7 @@ from multiprocessing import Process
 HOST = "35.237.36.219" # static IP of mosquitto broker
 PORT = 1883
 KEEPALIVE = 30
-TOPIC = os.getenv("TOPIC", "usa/quincy/1")) # defaults to $("usa/quincy/1")
+TOPIC = os.getenv("TOPIC", "usa/quincy/1") # defaults to $("usa/quincy/1")
 GAIN = 1
 HEADERS = ['adc', 'channel', 'time_stamp', 'value'] # Headers of the upcoming csv file
 
