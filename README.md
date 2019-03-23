@@ -1,7 +1,9 @@
 # MQTT Sensor Data Publisher [Work in Progress]
 
 ## Introduction
-> Raspbian MQTT client that reads and publishes data acquired by four [Adafruit ADS1115](https://learn.adafruit.com/adafruit-4-channel-adc-breakouts/overview) units connected to a Rapsberry Pi 3 at different sample rates to an MQTT broker. Publishing side of Data Acquisition Platform.
+Raspbian MQTT client that reads and publishes data acquired by four [Adafruit ADS1115](https://learn.adafruit.com/adafruit-4-channel-adc-breakouts/overview) units connected to a Rapsberry Pi 3 at different sample rates to an MQTT broker. This is the publishing side of the [Data Acquisition Platform](https://github.com/encresearch/data-assimilation).
+
+
 
 ## Hardware Setup
 
@@ -17,21 +19,41 @@ The Adafruit ADS1115 uses the I2C bus to communicate. This protocol needs just t
 
 For a complete setup of four ADS1115 units with different address, connect as below:
 
-![ADS1115 Wiring Diagram](docs/images/ads_raspi_wiring.jpg)
+![ADS1115 Wiring Diagram](./docs/images/wiring.png)
 
 In this example diagram, an Arduino board is being used. To setup this architecture in a Raspberry Pi 3, just connect it to the correct GPIO pins on the board. For more information about the Raspberry Pi GPIO, visit [here](https://www.raspberrypi.org/documentation/usage/gpio/).
 
 ## Dependencies and Setup
-The dependencies can be met either by cloning into the project and setting up a conda environment based on the ```environment.yml``` file, or by building the publisher container alongside a telegrafg container using the ```docker-compose.yml``` file.
+The dependencies can be met either by cloning into the project and setting up a conda environment based on the ```environment.yml``` file, or by building the publisher container alongside a telegraf container using the ```docker-compose.yml``` file.
+
+### Install and run with Docker
+> Telegraf not yet available
+
+Install [Docker](https://docs.docker.com/install/)
+```
+$ sudo apt-get update
+$ sudo apt-get upgrade 
+$ curl -sSL https://get.docker.com | sh
+``` 
+
+Install [Docker-Compose](https://docs.docker.com/compose/install/)
+```$ sudo pip install docker-compose```
+
+Run docker-compose
+```$ docker-compose -f docker-compose.yml up -d```
+
+To stop and remove containers, networks and images created by up. (External volumes won't be removed)
+```$ docker-compose -f docker-compose.yml down```
+
 ### Install and Run with conda
-> Telegraf will have to be setup manually
+Telegraf will have to be setup manually
 
 Install Miniconda
-```sudo apt-get update && wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh```
-
-```sudo md5sum Miniconda3-latest-Linux-armv7l.sh```
-
-```sudo /bin/bash Miniconda3-latest-Linux-armv7l.sh```
+```
+$ sudo apt-get update && wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+$ sudo md5sum Miniconda3-latest-Linux-armv7l.sh
+$ sudo /bin/bash Miniconda3-latest-Linux-armv7l.sh
+```
 
 Change the default installation directory to ```/home/pi/miniconda3```
 
@@ -50,20 +72,7 @@ Create a conda environment based off our YAML file
 Activate the environment
 ```source activate mqtt-publisher```
 
-To run, cd into ```mqtt_publisher/``` and execute the python file
-```python publisher.py```
-
-### Install and run with Docker + Telegraf [NOT YET AVAILABLE]
-
-Install [Docker](https://docs.docker.com/install/) 
-
-Install [Docker-Compose](https://docs.docker.com/compose/install/)
-
-Run docker-compose
-```docker-compose -f docker-compose.yml up -d```
-
-To stop and remove containers, networks and images created by up. (External volumes won't be removed)
-```docker-compose -f docker-compose.yml down```
+To run, cd into ```mqtt_publisher/``` and execute the python file ```python publisher.py```.
 
 ## Contributing
 Pull requests and stars are always welcome. To contribute, create a descriptive branch off of master (ex ```data-migration-tests```), commit to it, and submit a pull request.

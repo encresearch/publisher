@@ -3,7 +3,7 @@ version: '3.1'
 services:
   publisher:
       container_name: publisher
-      build: .
+      image: encresearch/mqtt-connector:latest
       volumes:
         - ./mqtt_publisher:/app
 
