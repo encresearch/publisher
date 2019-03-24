@@ -3,15 +3,18 @@
 ## Introduction
 Raspbian MQTT client that reads and publishes data acquired by four [Adafruit ADS1115](https://learn.adafruit.com/adafruit-4-channel-adc-breakouts/overview) units connected to a Rapsberry Pi 3 at different sample rates to an MQTT broker. This is the publishing side of the [Data Acquisition Platform](https://github.com/encresearch/data-assimilation).
 
-
-
 ## Hardware Setup
 
 ### Powering the ADCs
 Each ADC unit can be powered with either 5v or 3.3v. Bare in mind that the maximum input voltage in each of the ADCs' units is VDD.
 
 ### I2C Connection
-The Adafruit ADS1115 uses the I2C bus to communicate. This protocol needs just two pins to connect **SCL** and **SDA**. These can be shared by several I2C devices as long as the addresses are different. The ADS11x5 chips have a base 7-bit I2C address of 0x48 (1001000) and allows four different addresses using the ADR pin. To program the address, connect the address pin as follows:
+The Adafruit ADS1115 uses the I2C bus to communicate. This protocol needs just two pins to connect **SCL** and **SDA**. These can be shared by several I2C devices as long as the addresses are different. You need to enable the I2C interface in the Raspberry Pi. For this, open the terminal and type:
+```$ sudo raspi-config```
+
+This will open the ```Raspberry Pi Software Configuration Tool```. After this, go to ```Interfacing Options```, then ```P5 I2C```, and enter ```Yes``` to enable the ARM I2C interface.
+
+The ADS11x5 chips have a base 7-bit I2C address of 0x48 (1001000) and allows four different addresses using the ADR pin. To program the address, connect the address pin as follows:
 * 0x48 (1001000) ADR -> GND
 * 0x49 (1001001) ADR -> VDD
 * 0x4A (1001010) ADR -> SDA
@@ -20,8 +23,7 @@ The Adafruit ADS1115 uses the I2C bus to communicate. This protocol needs just t
 For a complete setup of four ADS1115 units with different address, connect as below:
 
 ![ADS1115 Wiring Diagram](./docs/images/wiring.png)
-
-In this example diagram, an Arduino board is being used. To setup this architecture in a Raspberry Pi 3, just connect it to the correct GPIO pins on the board. For more information about the Raspberry Pi GPIO, visit [here](https://www.raspberrypi.org/documentation/usage/gpio/).
+For more information about the Raspberry Pi GPIO, visit [here](https://www.raspberrypi.org/documentation/usage/gpio/).
 
 ## Dependencies and Setup
 The dependencies can be met either by cloning into the project and setting up a conda environment based on the ```environment.yml``` file, or by building the publisher container alongside a telegraf container using the ```docker-compose.yml``` file.
@@ -39,11 +41,14 @@ $ curl -sSL https://get.docker.com | sh
 Install [Docker-Compose](https://docs.docker.com/compose/install/)
 ```$ sudo pip install docker-compose```
 
+Clone repository.
+```$ git clone https://github.com/encresearch/mqtt-publisher.git```
+
 Run docker-compose
-```$ docker-compose -f docker-compose.yml up -d```
+```$ sudo docker-compose -f docker-compose.yml up -d```
 
 To stop and remove containers, networks and images created by up. (External volumes won't be removed)
-```$ docker-compose -f docker-compose.yml down```
+```$ sudo docker-compose -f docker-compose.yml down```
 
 ### Install and Run with conda
 Telegraf will have to be setup manually

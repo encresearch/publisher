@@ -30,7 +30,7 @@ import time
 import os
 from multiprocessing import Process
 
-HOST = "35.237.36.219" # static IP of mosquitto broker
+HOST = "35.190.191.26" # static IP of mosquitto broker
 PORT = 1883
 KEEPALIVE = 30
 TOPIC = os.getenv("TOPIC", "usa/quincy/1") # defaults to $("usa/quincy/1")
