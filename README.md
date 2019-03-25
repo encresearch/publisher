@@ -9,7 +9,12 @@ Raspbian MQTT client that reads and publishes data acquired by four [Adafruit AD
 Each ADC unit can be powered with either 5v or 3.3v. Bare in mind that the maximum input voltage in each of the ADCs' units is VDD.
 
 ### I2C Connection
-The Adafruit ADS1115 uses the I2C bus to communicate. This protocol needs just two pins to connect **SCL** and **SDA**. These can be shared by several I2C devices as long as the addresses are different. The ADS11x5 chips have a base 7-bit I2C address of 0x48 (1001000) and allows four different addresses using the ADR pin. To program the address, connect the address pin as follows:
+The Adafruit ADS1115 uses the I2C bus to communicate. This protocol needs just two pins to connect **SCL** and **SDA**. These can be shared by several I2C devices as long as the addresses are different. You need to enable the I2C interface in the Raspberry Pi. For this, open the terminal and type:
+```$ sudo raspi-config```
+
+This will open the ```Raspberry Pi Software Configuration Tool```. After this, go to ```Interfacing Options```, then ```P5 I2C```, and enter ```Yes``` to enable the ARM I2C interface.
+
+The ADS11x5 chips have a base 7-bit I2C address of 0x48 (1001000) and allows four different addresses using the ADR pin. To program the address, connect the address pin as follows:
 * 0x48 (1001000) ADR -> GND
 * 0x49 (1001001) ADR -> VDD
 * 0x4A (1001010) ADR -> SDA
