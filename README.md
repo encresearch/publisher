@@ -3,8 +3,6 @@
 ## Introduction
 Raspbian MQTT client that reads and publishes data acquired by four [Adafruit ADS1115](https://learn.adafruit.com/adafruit-4-channel-adc-breakouts/overview) units connected to a Rapsberry Pi 3 at different sample rates to an MQTT broker. This is the publishing side of the [Data Acquisition Platform](https://github.com/encresearch/data-assimilation).
 
-
-
 ## Hardware Setup
 
 ### Powering the ADCs
@@ -38,11 +36,14 @@ $ curl -sSL https://get.docker.com | sh
 Install [Docker-Compose](https://docs.docker.com/compose/install/)
 ```$ sudo pip install docker-compose```
 
+Clone repository.
+```$ git clone https://github.com/encresearch/mqtt-publisher.git```
+
 Run docker-compose
-```$ docker-compose -f docker-compose.yml up -d```
+```$ sudo docker-compose -f docker-compose.yml up -d```
 
 To stop and remove containers, networks and images created by up. (External volumes won't be removed)
-```$ docker-compose -f docker-compose.yml down```
+```$ sudo docker-compose -f docker-compose.yml down```
 
 ### Install and Run with conda
 Telegraf will have to be setup manually
