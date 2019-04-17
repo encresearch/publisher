@@ -13,7 +13,7 @@ install:
   # Useful for debugging any issues with conda
   - conda info -a
   - conda env create -f environment.yml
-  - source activate mqtt-publisher
+  - source activate publisher
   # Installation of influxdb
   - curl -sL https://repos.influxdata.com/influxdb.key | sudo apt-key add -
   - source /etc/lsb-release

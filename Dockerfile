@@ -2,7 +2,7 @@
 # a miniconda image from the docker cloud
 FROM arm32v7/python:3.4-stretch
 LABEL maintainer="Sebastian Arboleda <sebasarboleda22@gmail.com>" 
-LABEL Name="mqtt-publisher Version=0.0.1"
+LABEL Name="publisher Version=0.0.1"
 
 COPY environment.yml /
 
@@ -21,6 +21,6 @@ RUN apt-get update \
 # Create conda environment based on yaml file
 RUN conda env create -f environment.yml
 
-COPY ./mqtt_publisher /app
+COPY ./publisher /app
 WORKDIR /app
-CMD /bin/bash -c "source activate mqtt-publisher && python -u publisher.py"
+CMD /bin/bash -c "source activate publisher && python -u publisher.py"

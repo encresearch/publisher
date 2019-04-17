@@ -1,7 +1,7 @@
-# MQTT Sensor Data Publisher [Work in Progress]
+# Publisher: Raspberry Pi Client for Sending Sensor Data
 
 ## Introduction
-Raspbian MQTT client that reads and publishes data acquired by four [Adafruit ADS1115](https://learn.adafruit.com/adafruit-4-channel-adc-breakouts/overview) units connected to a Rapsberry Pi 3 at different sample rates to an MQTT broker. This is the publishing side of the [Data Acquisition Platform](https://github.com/encresearch/data-assimilation).
+Raspbian client that reads and sends data acquired by four [Adafruit ADS1115](https://learn.adafruit.com/adafruit-4-channel-adc-breakouts/overview) units connected to a Rapsberry Pi at different sample rates over MQTT to a broker. This is the publishing side of the [Data Acquisition Platform](https://github.com/encresearch/data-assimilation-system).
 
 ## Hardware Setup
 
@@ -42,7 +42,7 @@ Install [Docker-Compose](https://docs.docker.com/compose/install/)
 ```$ sudo pip install docker-compose```
 
 Clone repository.
-```$ git clone https://github.com/encresearch/mqtt-publisher.git```
+```$ git clone https://github.com/encresearch/publisher.git```
 
 Run docker-compose
 ```$ sudo docker-compose -f docker-compose.yml up -d```
