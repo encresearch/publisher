@@ -5,7 +5,7 @@ services:
       container_name: publisher
       build: .
       volumes:
-        - ./mqtt_publisher:/app
+        - ./publisher:/app
       environment:
         - TOPIC # Set the environment variable before deployment
       privileged: true # Gives access to the gpio pins

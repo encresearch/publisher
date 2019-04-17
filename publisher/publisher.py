@@ -17,8 +17,8 @@ reading range per chosen GAIN. A GAIN of 1 goes from -4.096V to 4.096V.
 This means that the maximum range of this 16 bits device is +/-32767.
 Thus, to convert bits to V, we divide 4.096 by 32767,
 which gives us 0.000125. In conclusion, to convert this readings to mV
-we just need to multiply the output times 0.125, which is done in the server
-side (mqtt-connector) to prevent time delays.
+we just need to multiply the output times by 0.125, which is done in the server
+side (connector) to prevent time delays.
 """
 
 from datetime import datetime

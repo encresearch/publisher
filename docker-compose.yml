@@ -3,9 +3,9 @@ version: '3.1'
 services:
   publisher:
       container_name: publisher
-      image: encresearch/mqtt-connector:latest
+      image: encresearch/publisher:latest
       volumes:
-        - ./mqtt_publisher:/app
+        - ./publisher:/app
 
 # TODO
 # Configuration example for future telegraf plugin

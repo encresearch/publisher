@@ -1,4 +1,4 @@
-name: mqtt-publisher
+name: publisher
 dependencies:
 - decorator=4.0.2=py34_0
 - ipython=4.0.0=py34_0
