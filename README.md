@@ -1,7 +1,7 @@
 ![PUBLISHER](./docs/images/publisher_logo.png)
 # PUBLISHER: Raspberry Pi Client for Sending Sensor Data
+[![Build Status](https://travis-ci.org/encresearch/publisher.svg?branch=master)](https://travis-ci.org/encresearch/publisher)
 
-## Introduction
 Raspbian client that reads and sends data acquired by four [Adafruit ADS1115](https://learn.adafruit.com/adafruit-4-channel-adc-breakouts/overview) units connected to a Rapsberry Pi at different sample rates over MQTT to a broker. 
 
 This is the publishing side of the [Data Acquisition Platform](https://github.com/encresearch/data-assimilation-system).
