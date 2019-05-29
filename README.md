@@ -31,8 +31,10 @@ For a complete setup of four ADS1115 units with different address, connect as be
 ![ADS1115 Wiring Diagram](./docs/images/wiring.png)
 For more information about the Raspberry Pi GPIO, visit [here](https://www.raspberrypi.org/documentation/usage/gpio/).
 
-## Dependencies and Setup
-The dependencies can be met either by cloning into the project and setting up a conda environment based on the ```environment.yml``` file, or by building the publisher container alongside a telegraf container using the ```docker-compose.yml``` file.
+## Install and Run 
+These instructions are to get ```publisher``` up and running in your ```Raspberry Pi```. Make sure the hardware and wiring are set up correctly before trying to run the software.
+
+The dependencies can be met either by cloning into the project and setting up a conda environment based on the ```environment.yml``` file, or by building the publisher container alongside a telegraf container using the ```docker-compose.yml``` file. Instructions for both cases are explained below. **We recommend using Docker for installation**.
 
 ### Install and run with Docker
 > Telegraf not yet available
