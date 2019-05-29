@@ -1,5 +1,5 @@
 """
-This script reads from different Analog to Digital Converters (ADC) 
+This script reads from different Analog to Digital Converters (ADC)
 inputs at three established frequencies. It runs two processes at the same time.
 They collect data from the first two, and last two ADCs respectively, writes it to a
 CSV file, and then sends it to a Mosquitto broker on the cloud.
@@ -19,6 +19,10 @@ Thus, to convert bits to V, we divide 4.096 by 32767,
 which gives us 0.000125. In conclusion, to convert this readings to mV
 we just need to multiply the output times by 0.125, which is done in the server
 side (connector) to prevent time delays.
+
+All readings are done at 10Hz.
+
+todo [Magnetometer functions coming up]
 """
 
 from datetime import datetime
@@ -28,7 +32,6 @@ import pandas as pd
 import numpy as np
 import time
 import os
-from multiprocessing import Process
 
 HOST = "10.128.189.236" # static IP of mosquitto broker
 PORT = 1883
@@ -56,10 +59,10 @@ def connect_to_broker(client_id, host, port, keepalive, on_connect, on_publish):
     return (client, connection)
 
 def read_ten_hz():
-    """ 
-    Reads from all channels from first two (0, 1) adc's ten times in a second, 
+    """
+    Reads from all channels from first two (0, 1) adc's ten times in a second,
     creates a numpy array which is then converted to a panda's dataframe and into a CSV file
-    and sent to the MQTT broker with topic RasPi1/10Hz
+    and sent to the MQTT broker.
     """
     client_id = "{0}".format("/TEN_HZ") # <country>/<city>/<device_num>/<reading_type>
     data_rate = 475
@@ -71,9 +74,9 @@ def read_ten_hz():
         # Function for clients1's specific callback when pubslishing message
         print("Data 10hz Published")
         pass
-      
+
     client, connection = connect_to_broker(client_id=client_id, host=HOST, port=PORT, keepalive=KEEPALIVE, on_connect=on_connect, on_publish=on_publish)
-    
+
     client.loop_start()
 
     while True:
@@ -88,6 +91,14 @@ def read_ten_hz():
             values = np.vstack((values, np.array([2, 2, datetime.now(), adc1.read_adc(1, gain=GAIN, data_rate=data_rate)])))
             values = np.vstack((values, np.array([2, 3, datetime.now(), adc1.read_adc(2, gain=GAIN, data_rate=data_rate)])))
             values = np.vstack((values, np.array([2, 4, datetime.now(), adc1.read_adc(3, gain=GAIN, data_rate=data_rate)])))
+            values = np.vstack((values, np.array([3, 1, datetime.now(), adc2.read_adc(0, gain=GAIN, data_rate=data_rate)])))
+            values = np.vstack((values, np.array([3, 2, datetime.now(), adc2.read_adc(1, gain=GAIN, data_rate=data_rate)])))
+            values = np.vstack((values, np.array([3, 3, datetime.now(), adc2.read_adc(2, gain=GAIN, data_rate=data_rate)])))
+            values = np.vstack((values, np.array([3, 4, datetime.now(), adc2.read_adc(3, gain=GAIN, data_rate=data_rate)])))
+            values = np.vstack((values, np.array([4, 1, datetime.now(), adc3.read_adc(0, gain=GAIN, data_rate=data_rate)])))
+            values = np.vstack((values, np.array([4, 2, datetime.now(), adc3.read_adc(1, gain=GAIN, data_rate=data_rate)])))
+            values = np.vstack((values, np.array([4, 3, datetime.now(), adc3.read_adc(2, gain=GAIN, data_rate=data_rate)])))
+            values = np.vstack((values, np.array([4, 4, datetime.now(), adc3.read_adc(3, gain=GAIN, data_rate=data_rate)])))
             operation_time = time.time()-now
             if operation_time < 0.1:
                 time.sleep(0.1 - operation_time)
@@ -97,53 +108,5 @@ def read_ten_hz():
         csv = f.read()
         client.publish(TOPIC, csv, 2)
 
-def read_one_hundred_hz():
-    """ 
-    Reads channels from last two ADCs at a 1Hz rate, except for the last channel (A3)
-    of the last ADC (adc3) which is read at 100Hz
-    """
-    client_id = "{0}".format("/ONE_HUNDRED_HZ") # <country>/<city>/<device_num>/<reading_type>
-    data_rate = 860 # Also different from the first function
-
-    def on_connect(client, userdata, flags, rc):
-        pass
-
-    def on_publish(client, userdata, result):
-        # Function for clients1's specific callback when pubslishing message
-        print("Data one/hundred Published")
-        pass
-      
-    client, connection = connect_to_broker(client_id=client_id, host=HOST, port=PORT, keepalive=KEEPALIVE, on_connect=on_connect, on_publish=on_publish)
-    
-    client.loop_start()
-
-    while True:
-        #create an empty array with 4 'columns'
-        values = np.empty((0, 4))
-        for _ in range(60): # makes 60 loops, assuming the whole operation above takes ~1 second
-            # Make one reading of all 1Hz channels on ADCs 2 and 3
-            values = np.vstack((values, np.array([3, 1, datetime.now(), adc2.read_adc(0, gain=GAIN, data_rate=data_rate)])))
-            values = np.vstack((values, np.array([3, 2, datetime.now(), adc2.read_adc(1, gain=GAIN, data_rate=data_rate)])))
-            values = np.vstack((values, np.array([3, 3, datetime.now(), adc2.read_adc(2, gain=GAIN, data_rate=data_rate)])))
-            values = np.vstack((values, np.array([3, 4, datetime.now(), adc2.read_adc(3, gain=GAIN, data_rate=data_rate)])))
-            values = np.vstack((values, np.array([4, 1, datetime.now(), adc3.read_adc(0, gain=GAIN, data_rate=data_rate)])))
-            values = np.vstack((values, np.array([4, 2, datetime.now(), adc3.read_adc(1, gain=GAIN, data_rate=data_rate)])))
-            values = np.vstack((values, np.array([4, 3, datetime.now(), adc3.read_adc(2, gain=GAIN, data_rate=data_rate)])))
-            # Reads from 4th pin on adc3 @ 100Hz... 
-            for _ in range(100): # The following should be repeated 100 times to complete a second
-                now = time.time() #Time measurement to know how long this procedure takes
-                values = np.vstack((values, np.array([4, 4, datetime.now(), adc3.read_adc(3, gain=GAIN, data_rate=860)])))
-                operation_time = time.time()-now
-                if operation_time < 0.01:
-                    time.sleep(0.01 - operation_time)
-        dataframe = pd.DataFrame(values, columns=HEADERS)
-        dataframe.to_csv('hundred_hz.csv', columns=HEADERS, index=False)
-        f = open('hundred_hz.csv')
-        csv = f.read()
-        client.publish(TOPIC, csv, 2)
-
 if __name__ == '__main__':
-    p_ten_hz = Process(target=read_ten_hz)
-    p_hundred_hz = Process(target=read_one_hundred_hz)
-    p_ten_hz.start()
-    p_hundred_hz.start()
+    read_ten_hz()
