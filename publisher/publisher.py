@@ -32,7 +32,6 @@ import pandas as pd
 import numpy as np
 import time
 import os
-from multiprocessing import Process
 
 HOST = "10.128.189.236" # static IP of mosquitto broker
 PORT = 1883
