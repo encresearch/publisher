@@ -76,7 +76,7 @@ Telegraf will have to be setup manually
 Install Miniconda
 
 ```
-$ sudo apt-get update && wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+$ sudo apt-get update && wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-armv7l.sh
 $ sudo md5sum Miniconda3-latest-Linux-armv7l.sh
 $ sudo /bin/bash Miniconda3-latest-Linux-armv7l.sh
 ```
@@ -93,6 +93,12 @@ And add this at the end:
 
 ```export PATH="/home/pi/miniconda3/bin:$PATH"```
 
+Add directory permissions:
+
+```
+sudo chown -R pi miniconda3
+```
+
 Update conda package manager:
 
 ```
@@ -108,10 +114,10 @@ conda env create -f environment.yml
 Activate the environment:
 
 ```
-source activate mqtt-publisher
+source activate publisher
 ```
 
-To run, cd into ```mqtt_publisher/``` and execute the python file:
+To run, cd into ```publisher/``` and execute the python file:
 
 ```
 python publisher.py
