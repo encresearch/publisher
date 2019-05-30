@@ -33,12 +33,14 @@ import numpy as np
 import time
 import os
 
-HOST = "10.128.189.236" # static IP of mosquitto broker
-PORT = 1883
+HOST = os.getenv("BROKER_IP", "10.128.189.236") # static IP of mosquitto broker
+PORT = os.getenv("BROKER_PORT", 1883)
 KEEPALIVE = 30
 TOPIC = os.getenv("TOPIC", "usa/quincy/1") # defaults to $("usa/quincy/1")
 GAIN = 1
 HEADERS = ['adc', 'channel', 'time_stamp', 'value'] # Headers of the upcoming csv file
+client_id = "{0}".format("/TEN_HZ") # <country>/<city>/<device_num>/<reading_type>
+data_rate = 475
 
 # create four ADS115 instances with different addresses
 # based on the connection of the ADR (address) pin
@@ -58,20 +60,51 @@ def connect_to_broker(client_id, host, port, keepalive, on_connect, on_publish):
     connection = client.connect(host, port, keepalive)
     return (client, connection)
 
-def read_ten_hz():
+def get_readings():
+    values = np.empty((0, 4)) #create an empty array with 4 'columns'
+    for _ in range(600): # The following should be repeated 600 times to complete a minute
+        now = time.time() #Time measurement to know how long this procedure takes
+        values = np.vstack((values, np.array([1, 1, datetime.now(), adc0.read_adc(0, gain=GAIN, data_rate=data_rate)])))
+        values = np.vstack((values, np.array([1, 2, datetime.now(), adc0.read_adc(1, gain=GAIN, data_rate=data_rate)])))
+        values = np.vstack((values, np.array([1, 3, datetime.now(), adc0.read_adc(2, gain=GAIN, data_rate=data_rate)])))
+        values = np.vstack((values, np.array([1, 4, datetime.now(), adc0.read_adc(3, gain=GAIN, data_rate=data_rate)])))
+        values = np.vstack((values, np.array([2, 1, datetime.now(), adc1.read_adc(0, gain=GAIN, data_rate=data_rate)])))
+        values = np.vstack((values, np.array([2, 2, datetime.now(), adc1.read_adc(1, gain=GAIN, data_rate=data_rate)])))
+        values = np.vstack((values, np.array([2, 3, datetime.now(), adc1.read_adc(2, gain=GAIN, data_rate=data_rate)])))
+        values = np.vstack((values, np.array([2, 4, datetime.now(), adc1.read_adc(3, gain=GAIN, data_rate=data_rate)])))
+        values = np.vstack((values, np.array([3, 1, datetime.now(), adc2.read_adc(0, gain=GAIN, data_rate=data_rate)])))
+        values = np.vstack((values, np.array([3, 2, datetime.now(), adc2.read_adc(1, gain=GAIN, data_rate=data_rate)])))
+        values = np.vstack((values, np.array([3, 3, datetime.now(), adc2.read_adc(2, gain=GAIN, data_rate=data_rate)])))
+        values = np.vstack((values, np.array([3, 4, datetime.now(), adc2.read_adc(3, gain=GAIN, data_rate=data_rate)])))
+        values = np.vstack((values, np.array([4, 1, datetime.now(), adc3.read_adc(0, gain=GAIN, data_rate=data_rate)])))
+        values = np.vstack((values, np.array([4, 2, datetime.now(), adc3.read_adc(1, gain=GAIN, data_rate=data_rate)])))
+        values = np.vstack((values, np.array([4, 3, datetime.now(), adc3.read_adc(2, gain=GAIN, data_rate=data_rate)])))
+        values = np.vstack((values, np.array([4, 4, datetime.now(), adc3.read_adc(3, gain=GAIN, data_rate=data_rate)])))
+        operation_time = time.time()-now
+        if operation_time < 0.1:
+            time.sleep(0.1 - operation_time)
+    dataframe = pd.DataFrame(values, columns=HEADERS)
+    return dataframe
+
+def send_readings(dataframe, client):
+    dataframe.to_csv('ten_hz.csv', columns=HEADERS, index=False)
+    f = open('ten_hz.csv')
+    csv = f.read()
+    client.publish(TOPIC, csv, 2)
+
+def main():
     """
-    Reads from all channels from first two (0, 1) adc's ten times in a second,
+    Reads from all channels from all adc's ten times in a second,
     creates a numpy array which is then converted to a panda's dataframe and into a CSV file
     and sent to the MQTT broker.
     """
-    client_id = "{0}".format("/TEN_HZ") # <country>/<city>/<device_num>/<reading_type>
-    data_rate = 475
 
     def on_connect(client, userdata, flags, rc):
+        print("connected with result code {}".format(rc))
         pass
 
     def on_publish(client, userdata, result):
-        # Function for clients1's specific callback when pubslishing message
+        # Function for clients's specific callback when pubslishing message
         print("Data 10hz Published")
         pass
 
@@ -80,33 +113,8 @@ def read_ten_hz():
     client.loop_start()
 
     while True:
-        values = np.empty((0, 4)) #create an empty array with 4 'columns'
-        for _ in range(600): # The following should be repeated 600 times to complete a minute
-            now = time.time() #Time measurement to know how long this procedure takes
-            values = np.vstack((values, np.array([1, 1, datetime.now(), adc0.read_adc(0, gain=GAIN, data_rate=data_rate)])))
-            values = np.vstack((values, np.array([1, 2, datetime.now(), adc0.read_adc(1, gain=GAIN, data_rate=data_rate)])))
-            values = np.vstack((values, np.array([1, 3, datetime.now(), adc0.read_adc(2, gain=GAIN, data_rate=data_rate)])))
-            values = np.vstack((values, np.array([1, 4, datetime.now(), adc0.read_adc(3, gain=GAIN, data_rate=data_rate)])))
-            values = np.vstack((values, np.array([2, 1, datetime.now(), adc1.read_adc(0, gain=GAIN, data_rate=data_rate)])))
-            values = np.vstack((values, np.array([2, 2, datetime.now(), adc1.read_adc(1, gain=GAIN, data_rate=data_rate)])))
-            values = np.vstack((values, np.array([2, 3, datetime.now(), adc1.read_adc(2, gain=GAIN, data_rate=data_rate)])))
-            values = np.vstack((values, np.array([2, 4, datetime.now(), adc1.read_adc(3, gain=GAIN, data_rate=data_rate)])))
-            values = np.vstack((values, np.array([3, 1, datetime.now(), adc2.read_adc(0, gain=GAIN, data_rate=data_rate)])))
-            values = np.vstack((values, np.array([3, 2, datetime.now(), adc2.read_adc(1, gain=GAIN, data_rate=data_rate)])))
-            values = np.vstack((values, np.array([3, 3, datetime.now(), adc2.read_adc(2, gain=GAIN, data_rate=data_rate)])))
-            values = np.vstack((values, np.array([3, 4, datetime.now(), adc2.read_adc(3, gain=GAIN, data_rate=data_rate)])))
-            values = np.vstack((values, np.array([4, 1, datetime.now(), adc3.read_adc(0, gain=GAIN, data_rate=data_rate)])))
-            values = np.vstack((values, np.array([4, 2, datetime.now(), adc3.read_adc(1, gain=GAIN, data_rate=data_rate)])))
-            values = np.vstack((values, np.array([4, 3, datetime.now(), adc3.read_adc(2, gain=GAIN, data_rate=data_rate)])))
-            values = np.vstack((values, np.array([4, 4, datetime.now(), adc3.read_adc(3, gain=GAIN, data_rate=data_rate)])))
-            operation_time = time.time()-now
-            if operation_time < 0.1:
-                time.sleep(0.1 - operation_time)
-        dataframe = pd.DataFrame(values, columns=HEADERS)
-        dataframe.to_csv('ten_hz.csv', columns=HEADERS, index=False)
-        f = open('ten_hz.csv')
-        csv = f.read()
-        client.publish(TOPIC, csv, 2)
+        dataframe = get_readings() # a dataframe is created every minute
+        send_readings(dataframe, client) # Then it is sent to the broker client
 
 if __name__ == '__main__':
-    read_ten_hz()
+    main()
