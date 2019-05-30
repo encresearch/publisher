@@ -1,5 +1,5 @@
 venv/
 *.pyc
-*.csv
+ten_hz.csv
 __pycache__/
 settings.json

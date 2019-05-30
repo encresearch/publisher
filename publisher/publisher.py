@@ -22,7 +22,7 @@ side (connector) to prevent time delays.
 
 All readings are done at 10Hz.
 
-todo [Magnetometer functions coming up]
+TODO [Magnetometer functions coming up]
 """
 
 from datetime import datetime
@@ -33,7 +33,7 @@ import numpy as np
 import time
 import os
 
-HOST = os.getenv("BROKER_IP", "10.128.189.236") # static IP of mosquitto broker
+HOST = os.getenv("BROKER_IP", "mqtt.eclipse.org") # static IP of mosquitto broker
 PORT = os.getenv("BROKER_PORT", 1883)
 KEEPALIVE = 30
 TOPIC = os.getenv("TOPIC", "usa/quincy/1") # defaults to $("usa/quincy/1")
@@ -46,10 +46,12 @@ data_rate = 475
 # based on the connection of the ADR (address) pin
 # Data Rate samples are chosen based on the frequency we want to pull data
 # from it. data_rate indicates the time it will take in measuring the analog data
-adc0 = Adafruit_ADS1x15.ADS1115(address=0x48) # ADR to GRN | Will do 10Hz readings
-adc1 = Adafruit_ADS1x15.ADS1115(address=0x49) # ADR to VDD | Will do 10Hz readings
-adc2 = Adafruit_ADS1x15.ADS1115(address=0x4A) # ADR to SDA | Will do 1Hz readings
-adc3 = Adafruit_ADS1x15.ADS1115(address=0x4B) # ADR to SCL | Will do 100Hz readings
+# TODO do this in hex with an iteration while storing in a list(adcs).
+adc0 = Adafruit_ADS1x15.ADS1115(address=0x48)
+adc1 = Adafruit_ADS1x15.ADS1115(address=0x49)
+adc2 = Adafruit_ADS1x15.ADS1115(address=0x4A)
+adc3 = Adafruit_ADS1x15.ADS1115(address=0x4B)
+adcs = [adc0, adc1, adc2, adc3]
 
 def connect_to_broker(client_id, host, port, keepalive, on_connect, on_publish):
     # Params -> Client(client_id=””, clean_session=True, userdata=None, protocol=MQTTv311, transport=”tcp”)
@@ -62,6 +64,7 @@ def connect_to_broker(client_id, host, port, keepalive, on_connect, on_publish):
 
 def get_readings():
     values = np.empty((0, 4)) #create an empty array with 4 'columns'
+    #TODO checkk out how we do it in testing and do the same iteration
     for _ in range(600): # The following should be repeated 600 times to complete a minute
         now = time.time() #Time measurement to know how long this procedure takes
         values = np.vstack((values, np.array([1, 1, datetime.now(), adc0.read_adc(0, gain=GAIN, data_rate=data_rate)])))
@@ -86,11 +89,12 @@ def get_readings():
     dataframe = pd.DataFrame(values, columns=HEADERS)
     return dataframe
 
-def send_readings(dataframe, client):
+def send_readings(dataframe, client=None):
     dataframe.to_csv('ten_hz.csv', columns=HEADERS, index=False)
     f = open('ten_hz.csv')
     csv = f.read()
-    client.publish(TOPIC, csv, 2)
+    if client is not None:
+        client.publish(TOPIC, csv, 2)
 
 def main():
     """
@@ -118,3 +122,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+    # TODO capture exceptions
+    # try: main(); except Exception as e: send_report(); start_over();

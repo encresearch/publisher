@@ -49,6 +49,7 @@ $ curl -sSL https://get.docker.com | sh
 Install [Docker-Compose](https://docs.docker.com/compose/install/):
 
 ```
+$ sudo apt-get install libffi-dev libssl-dev
 $ sudo pip install docker-compose
 ```
 
@@ -93,22 +94,24 @@ And add this at the end:
 
 ```export PATH="/home/pi/miniconda3/bin:$PATH"```
 
+***You need to close and open a new terminal for this change to take place.***
+
 Add directory permissions:
 
 ```
-sudo chown -R pi miniconda3
+$ sudo chown -R pi /home/pi/miniconda3
 ```
 
 Update conda package manager:
 
 ```
-conda update conda
+$ conda update conda
 ```
 
-Create a conda environment based off our YAML file:
+Create a conda environment based off our YAML file (you will need to cd into publisher's directory first):
 
 ```
-conda env create -f environment.yml
+$ conda env create -f environment.yml
 ```
 
 Activate the environment:
@@ -121,6 +124,25 @@ To run, cd into ```publisher/``` and execute the python file:
 
 ```
 python publisher.py
+```
+
+## Testing [Work In Progress]
+We are constantly updating our tests to cover as much as possible. Right now you can test the wiring and readings of the ADCs prior to deployment or development. We are currently working on setting up integration and e2e tests.
+To run our unit tests locally, first setup and activate the ```conda``` environment as indicated in the installation section.
+
+Install pytest:
+```
+$ conda install pytest
+```
+
+Update ```test.sh``` permissions, in case you haven't alredy:
+```
+$ chmod +x test.sh
+```
+
+Run
+```
+$ ./test.sh
 ```
 
 ## Contributing
