@@ -25,13 +25,14 @@ All readings are done at 10Hz.
 TODO [Magnetometer functions coming up]
 """
 
+import logging
+import time
+import os
 from datetime import datetime
 import Adafruit_ADS1x15
 import paho.mqtt.client as mqtt
 import pandas as pd
 import numpy as np
-import time
-import os
 
 HOST = os.getenv("BROKER_IP", "mqtt.eclipse.org") # static IP of mosquitto broker
 PORT = os.getenv("BROKER_PORT", 1883)
@@ -54,8 +55,12 @@ adc3 = Adafruit_ADS1x15.ADS1115(address=0x4B)
 adcs = [adc0, adc1, adc2, adc3]
 
 def connect_to_broker(client_id, host, port, keepalive, on_connect, on_publish):
-    # Params -> Client(client_id=””, clean_session=True, userdata=None, protocol=MQTTv311, transport=”tcp”)
-    # We set clean_session False, so in case connection is lost, it'll reconnect with same ID
+    """
+    Default params of mqtt.Client: ( client_id="", clean_session=True,
+    userdata=None, protocol=MQTTv311, transport="tcp" )
+    """
+    # We set clean_session False, so in case connection is lost,
+    # it'll reconnect with same ID
     client = mqtt.Client(client_id=client_id, clean_session=False)
     client.on_connect = on_connect
     client.on_publish = on_publish
@@ -64,9 +69,11 @@ def connect_to_broker(client_id, host, port, keepalive, on_connect, on_publish):
 
 def get_readings():
     values = np.empty((0, 4)) #create an empty array with 4 'columns'
-    #TODO checkk out how we do it in testing and do the same iteration
-    for _ in range(600): # The following should be repeated 600 times to complete a minute
-        now = time.time() #Time measurement to know how long this procedure takes
+    # TODO checkk out how we do it in testing and do the same iteration
+    # The following should be repeated 600 times to complete a minute
+    for _ in range(600):
+        # Time measurement to know how long this procedure takes
+        now = time.time()
         values = np.vstack((values, np.array([1, 1, datetime.now(), adc0.read_adc(0, gain=GAIN, data_rate=data_rate)])))
         values = np.vstack((values, np.array([1, 2, datetime.now(), adc0.read_adc(1, gain=GAIN, data_rate=data_rate)])))
         values = np.vstack((values, np.array([1, 3, datetime.now(), adc0.read_adc(2, gain=GAIN, data_rate=data_rate)])))
@@ -89,12 +96,21 @@ def get_readings():
     dataframe = pd.DataFrame(values, columns=HEADERS)
     return dataframe
 
+<<<<<<< HEAD
 def send_readings(dataframe, client=None):
     dataframe.to_csv('ten_hz.csv', columns=HEADERS, index=False)
     f = open('ten_hz.csv')
     csv = f.read()
     if client is not None:
         client.publish(TOPIC, csv, 2)
+=======
+def send_readings(dataframe, client):
+    """Recieves a Pandas' dataframe, creates CSV file and sends through mqtt."""
+    dataframe.to_csv('ten_hz.csv', columns=HEADERS, index=False)
+    readings_file = open('ten_hz.csv')
+    csv = readings_file.read()
+    client.publish(TOPIC, csv, 2)
+>>>>>>> 826469c... Add logging for general exceptions
 
 def main():
     """
@@ -104,15 +120,21 @@ def main():
     """
 
     def on_connect(client, userdata, flags, rc):
+        """To be displayed when connected"""
         print("connected with result code {}".format(rc))
-        pass
 
     def on_publish(client, userdata, result):
-        # Function for clients's specific callback when pubslishing message
+        """Function for clients's specific callback when pubslishing message"""
         print("Data 10hz Published")
-        pass
 
-    client, connection = connect_to_broker(client_id=client_id, host=HOST, port=PORT, keepalive=KEEPALIVE, on_connect=on_connect, on_publish=on_publish)
+    client, connection = connect_to_broker(
+        client_id=client_id,
+        host=HOST,
+        port=PORT,
+        keepalive=KEEPALIVE,
+        on_connect=on_connect,
+        on_publish=on_publish
+    )
 
     client.loop_start()
 
@@ -121,6 +143,16 @@ def main():
         send_readings(dataframe, client) # Then it is sent to the broker client
 
 if __name__ == '__main__':
+<<<<<<< HEAD
     main()
     # TODO capture exceptions
     # try: main(); except Exception as e: send_report(); start_over();
+=======
+    try:
+        main()
+    except Exception as e:
+        msg = "The System Ecnountered an Exception on"
+        date = datetime.now().strftime('%d %b %Y %H:%M')
+        logging.basicConfig(filename='publisher.log')
+        logging.exception("%s %s", msg, date)
+>>>>>>> 826469c... Add logging for general exceptions
