@@ -146,4 +146,6 @@ $ ./test.sh
 ```
 
 ## Contributing
-Pull requests and stars are always welcome. To contribute, create a descriptive branch off of master (ex ```data-migration-tests```), commit to it, and submit a pull request.
+Pull requests and stars are always welcome.
+
+To contribute, create a descriptive branch off of master (ex ```data-migration-tests```), commit to it, and submit a pull request.
