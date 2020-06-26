@@ -18,8 +18,6 @@ def test_connect_to_broker():
         on_connect=on_connect,
         on_publish=on_publish
     )
-    import pdb; pdb.set_trace()
-    # Now, lets test a fake connection
 
 @pytest.fixture
 def readings_df():
