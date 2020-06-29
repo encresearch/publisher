@@ -24,22 +24,34 @@ All readings are done at 10Hz.
 
 TODO [Magnetometer functions coming up]
 """
-import logging
-import time
 import os
+import time
+import logging
 from datetime import datetime
+
+# Run mock publisher if in an x86 dev machine
+# TOPIC: <country>/<city>/<device_num>/<reading_type>
+if 'x86' in os.uname().machine:
+    import warnings
+    from lib import Adafruit_ADS1x15_MOCK_x86 as Adafruit_ADS1x15
+    warnings.warn(
+        "x86 Machine Detected..."
+        " Running publisher in simulation mode"
+    )
+    TOPIC = os.getenv("PUBLISHER_TOPIC", "test_env/usa/quincy/1")
+else:
+    import Adafruit_ADS1x15
+    TOPIC = os.getenv("PUBLISHER_TOPIC", "usa/quincy/1")
+
 import paho.mqtt.client as mqtt
-import Adafruit_ADS1x15
 import pandas as pd
 import numpy as np
 
-# TOPIC: <country>/<city>/<device_num>/<reading_type>
 # For development purposes we are using Eclipse's public mosquitto broker
 # static IP.
 HOST = os.getenv("BROKER_IP", "mqtt.eclipse.org")
 PORT = os.getenv("BROKER_PORT", 1883)
 KEEPALIVE = 30
-TOPIC = os.getenv("TOPIC", "usa/quincy/1")
 GAIN = 1
 DF_HEADERS = ['adc', 'channel', 'time_stamp', 'value']
 client_id = "{0}".format("/TEN_HZ")
