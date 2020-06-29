@@ -2,7 +2,9 @@
 # PUBLISHER: Raspberry Pi Client for Sending Sensor Data
 [![Build Status](https://travis-ci.org/encresearch/publisher.svg?branch=master)](https://travis-ci.org/encresearch/publisher)
 
-Raspbian client that reads and sends data acquired by four [Adafruit ADS1115](https://learn.adafruit.com/adafruit-4-channel-adc-breakouts/overview) units connected to a Rapsberry Pi at 10Hz sample rate over MQTT to a broker. 
+Raspbian client that reads and sends data acquired by four [Adafruit ADS1115](https://learn.adafruit.com/adafruit-4-channel-adc-breakouts/overview) units connected to a Rapsberry Pi at 10Hz sample rate over MQTT to a broker.
+
+This code can also be executed from a regular `x86` machine for development or simulation purposes. If executed this way, the main file makes use of a simulation library that returns random values for the function `Adafruit_ADS1x15.ADS1115.read_adc()`. The topic to which it's sent to our MQTT broker is also prepended with `test_env/`. Please see instructions below of how to run it in simulation mode.
 
 This is the publishing side of the [Data Acquisition Platform](https://github.com/encresearch/data-assimilation-system).
 
@@ -144,6 +146,9 @@ Run
 ```
 $ ./test.sh
 ```
+
+## Simulation Mode
+To run in simulation mode, `publisher.py` will have to be executed from an `x86` machine. You will have to first install the dependencies from our `requirements/dev_x86.txt` using pip, and then just execute the `publisher.py` file. Bear in mind that in simulation mode, all ADC readings are random integers between -32767 and 32767 because of the GAIN that we set up the ADCs to in our production environment.
 
 ## Contributing
 Pull requests and stars are always welcome.
