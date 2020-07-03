@@ -1,39 +1,69 @@
 """File with most reading tests"""
+import os
+
 import pytest
+import pandas as pd
+
+from publisher.publisher import (
+    HOST,
+    PORT,
+    KEEPALIVE,
+    TOPIC,
+    ADC_INSTANCES_NUM,
+    SAMPLES_PER_MINUTE,
+    GENERATED_CSV_FILE_NAME,
+    GAIN,
+    data_rate,
+    connect_to_broker,
+    get_adc_ADS1115_objects,
+    get_readings,
+    send_readings
+)
+
+TEST_CLIENT_ID = 'test_client'
+
 
 def test_connect_to_broker():
-    from publisher.publisher import (
-        HOST, PORT, KEEPALIVE, TOPIC, client_id, connect_to_broker
-    )
-    def on_connect(client, userdata, flags, rc):
-        assert rc == 0 # assert the connection is successful
-        client.disconnect() # Then disconnect
-    def on_publish(client, userdata, result):
-        pass # just pass for now
+    """Test that our broker connection is working fine.
+    This doens't need to run in a RasPi.
+    """
     client, connection = connect_to_broker(
-        client_id=client_id,
+        client_id='test_client',
         host=HOST,
         port=PORT,
-        keepalive=KEEPALIVE,
-        on_connect=on_connect,
-        on_publish=on_publish
+        keepalive=KEEPALIVE
     )
+    assert client is not None
+    assert connection is not None
+    client.disconnect()
 
-@pytest.fixture
-def readings_df():
-    from publisher.publisher import get_readings
-    df = get_readings()
-    return df
+
+def test_get_adc_ADS1115_objects():
+    """Test ADC's are instantiated correctly."""
+    adcs = get_adc_ADS1115_objects()
+    sample_reading = adcs[0].read_adc(0, gain=GAIN, data_rate=data_rate)
+    assert len(adcs) == ADC_INSTANCES_NUM
+    assert sample_reading is not None
+
+
+def test_get_readings():
+    """Test the function that gets our readings in the determined frequency."""
+    # No. of rows = samples_per_minute * num_of_adcs * 4_pins_per_ADC
+    expected_df_samples_num = SAMPLES_PER_MINUTE * ADC_INSTANCES_NUM * 4
+    expected_individual_adc_sample_count = SAMPLES_PER_MINUTE * 4
+
+    adc0, adc1 = get_adc_ADS1115_objects()
+    df = get_readings(adc0, adc1)
+    all_adcs_readings = df['adc'].value_counts()
+
+    assert len(df) == expected_df_samples_num
+    for readings in all_adcs_readings:
+        assert readings == expected_individual_adc_sample_count
+
 
 def test_expected_readings():
-    """Outputs readings from all pins for calibration purposes."""
-    from publisher.publisher import (
-        Adafruit_ADS1x15,
-        GAIN,
-	data_rate,
-        adc0,
-        adc1
-    )
+    """Outputs real readings from all pins for calibration purposes."""
+    adc0, adc1 = get_adc_ADS1115_objects()
     adcs = [(0, adc0), (1, adc1)]
     readings = []
     ansi_code_yellow_init = "\033[93m"
@@ -45,7 +75,11 @@ def test_expected_readings():
             ansi_code_yellow_end
         )),
         for pin in range(4):
-            reading = adc[1].read_adc(pin, gain=GAIN, data_rate=data_rate)*0.125
+            reading = adc[1].read_adc(
+                pin,
+                gain=GAIN,
+                data_rate=data_rate
+            )*0.125
             assert reading is not None
             readings.append(reading)
             print('\t{}PIN: {}, READING: {} mV{}'.format(
@@ -62,48 +96,29 @@ def test_expected_readings():
             ansi_code_yellow_end
         ))
 
-def test_readings_and_rate(readings_df):
-    """Reads measurements for one minute."""
-    import pandas as pd
-    df = readings_df
-    assert len(df) == 4800 # TODO Change this to an actual sensor count function
-    all_adcs_readings = df['adc'].value_counts()
-    for readings in all_adcs_readings:
-        assert readings == 2400
-    # TODO test rates based on df
 
-""" TODO
-def test_send_readings(readings_df):
-    import os
-    import pandas as pd
-    from publisher.publisher import send_readings, connect_to_broker
-
-    HOST = os.getenv("BROKER_IP", "mqtt.eclipse.org")
-    PORT = os.getenv("BROKER_PORT", 1883)
-    KEEPALIVE = 30
-    TOPIC = os.getenv("TOPIC", "usa/quincy/testing-pi")
-    GAIN = 1
-    DF_HEADERS = ['adc', 'channel', 'time_stamp', 'value']
-    client_id = "{0}".format("/TEN_HZ")
-    data_rate = 475
+def test_send_readings():
+    """Test our func that sends ADC readings."""
+    # TODO: Test a CSV file is sent to the broker (with a fake broker container)
+    adc0, adc1 = get_adc_ADS1115_objects()
+    dataframe = get_readings(adc0=adc0, adc1=adc1)
+    dir_path = os.path.dirname(os.path.realpath(__file__))
 
     client, connection = connect_to_broker(
-        client_id=client_id,
+        client_id=TEST_CLIENT_ID,
         host=HOST,
         port=PORT,
-        keepalive=KEEPALIVE,
-        on_connect=None,
-        on_publish=None
+        keepalive=KEEPALIVE
     )
 
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    send_readings(readings_df, client)
-    # test a csv file is created
-    assert os.path.exists('{path}/{file}'.format(
-        path=dir_path,
-        file='ten_hz.csv'
-    ))
-    # TODO: Test a CSV file is sent to the broker (with a fake broker container)
-    pass
-"""
+    client.loop_start()
+    send_readings(dataframe, client)
 
+    # test a csv file is created
+    assert os.path.exists('{path}/../{file}'.format(
+        path=dir_path,
+        file=GENERATED_CSV_FILE_NAME
+    ))
+
+    client.loop_stop()
+    client.disconnect()

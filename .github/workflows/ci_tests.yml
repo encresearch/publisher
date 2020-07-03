@@ -1,0 +1,28 @@
+name: Publisher Simulation CI
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: Publisher PyTests
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get install python3-setuptools
+          pip3 install --no-cache -r requirements/dev_x86.txt
+
+
+      - name: Run Tests
+        run: |
+          chmod u+x test.sh
+          ./test.sh
