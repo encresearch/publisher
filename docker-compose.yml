@@ -1,4 +1,4 @@
-version: '3.1'
+version: '2'
 
 services:
   publisher:
@@ -9,7 +9,7 @@ services:
       privileged: true # Gives access to the gpio pins
       restart: unless-stopped
 
-  watchtower: # checks for changes in any of the installed images (on the latest tag)
+  watchtower: # checks for changes in the installed images (on the latest tag)
     image: v2tec/watchtower:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock # mounts docker socket to interact with Docker's API
