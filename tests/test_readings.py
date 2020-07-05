@@ -52,8 +52,8 @@ def test_get_readings():
     expected_df_samples_num = SAMPLES_PER_MINUTE * ADC_INSTANCES_NUM * 4
     expected_individual_adc_sample_count = SAMPLES_PER_MINUTE * 4
 
-    adc0, adc1 = get_adc_ADS1115_objects()
-    df = get_readings(adc0, adc1)
+    adcs = get_adc_ADS1115_objects()
+    df = get_readings(adcs)
     all_adcs_readings = df['adc'].value_counts()
 
     assert len(df) == expected_df_samples_num
@@ -62,13 +62,12 @@ def test_get_readings():
 
 
 def test_expected_readings():
-    """Outputs real readings from all pins for calibration purposes."""
-    adc0, adc1 = get_adc_ADS1115_objects()
-    adcs = [(0, adc0), (1, adc1)]
+    """Outputs readings from all pins for calibration purposes."""
+    adcs = get_adc_ADS1115_objects()
     readings = []
     ansi_code_yellow_init = "\033[93m"
     ansi_code_yellow_end = "\033[00m"
-    for adc in adcs:
+    for adc in enumerate(adcs):
         print('\n{}ADC: {}{}'.format(
             ansi_code_yellow_init,
             adc[0],
@@ -99,9 +98,8 @@ def test_expected_readings():
 
 def test_send_readings():
     """Test our func that sends ADC readings."""
-    # TODO: Test a CSV file is sent to the broker (with a fake broker container)
-    adc0, adc1 = get_adc_ADS1115_objects()
-    dataframe = get_readings(adc0=adc0, adc1=adc1)
+    adcs = get_adc_ADS1115_objects()
+    dataframe = get_readings(adcs)
     dir_path = os.path.dirname(os.path.realpath(__file__))
 
     client, connection = connect_to_broker(

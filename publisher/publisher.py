@@ -60,7 +60,7 @@ DF_HEADERS = ['adc', 'channel', 'time_stamp', 'value']
 
 ADC_SAMPLING_RATE = 10 # Hz
 SAMPLES_PER_MINUTE = ADC_SAMPLING_RATE * 60
-SAMPLING_PERIOD = 1 / ADC_SAMPLING_RATE
+SAMPLING_PERIOD = 1 / ADC_SAMPLING_RATE # secs/sample
 
 
 def get_adc_ADS1115_objects():
@@ -119,7 +119,7 @@ def connect_to_broker(client_id, host, port, keepalive,):
     return (client, connection)
 
 
-def get_readings(adc0, adc1):
+def get_readings(adcs):
     """
     Returns an array of 4 columns with headers -> HEADERS and the ADCs 10Hz
     measurements for each pin, for 1 minute (2,400 readings per ADC).
@@ -132,21 +132,21 @@ def get_readings(adc0, adc1):
     |-----|---------|------------|---------|
     """
     values = np.empty((0, 4)) #create an empty array with 4 'columns'
-    # TODO check out how we do it in testing and do the same iteration
     for _ in range(SAMPLES_PER_MINUTE):
         # Time measurement to know how long this procedure takes
         now = time.time()
-        values = np.vstack((values, np.array([0, 0, datetime.now(), adc0.read_adc(0, gain=GAIN, data_rate=data_rate)])))
-        values = np.vstack((values, np.array([0, 1, datetime.now(), adc0.read_adc(1, gain=GAIN, data_rate=data_rate)])))
-        values = np.vstack((values, np.array([0, 2, datetime.now(), adc0.read_adc(2, gain=GAIN, data_rate=data_rate)])))
-        values = np.vstack((values, np.array([0, 3, datetime.now(), adc0.read_adc(3, gain=GAIN, data_rate=data_rate)])))
-        values = np.vstack((values, np.array([1, 0, datetime.now(), adc1.read_adc(0, gain=GAIN, data_rate=data_rate)])))
-        values = np.vstack((values, np.array([1, 1, datetime.now(), adc1.read_adc(1, gain=GAIN, data_rate=data_rate)])))
-        values = np.vstack((values, np.array([1, 2, datetime.now(), adc1.read_adc(2, gain=GAIN, data_rate=data_rate)])))
-        values = np.vstack((values, np.array([1, 3, datetime.now(), adc1.read_adc(3, gain=GAIN, data_rate=data_rate)])))
+        for adc in enumerate(adcs):
+            for pin in range(4):
+                values = np.vstack((values, np.array([
+                    adc[0],
+                    pin,
+                    datetime.now(),
+                    adc[1].read_adc(pin, gain=GAIN, data_rate=data_rate)
+                ])))
         operation_time = time.time()-now
+    
         if operation_time < SAMPLING_PERIOD:
-            time.sleep(0.1 - operation_time)
+            time.sleep(SAMPLING_PERIOD - operation_time)
 
     dataframe = pd.DataFrame(values, columns=DF_HEADERS)
     return dataframe
@@ -169,7 +169,7 @@ def main():
     A dataframe is created every minute and then it is sent to the broker.
     """
 
-    adc0, adc1 = get_adc_ADS1115_objects()
+    adcs = get_adc_ADS1115_objects()
     client, connection = connect_to_broker(
         client_id=client_id,
         host=HOST,
@@ -180,5 +180,5 @@ def main():
     client.loop_start()
 
     while True:
-        dataframe = get_readings(adc0=adc0, adc1=adc1)
+        dataframe = get_readings(adcs=adcs)
         send_readings(dataframe, client)

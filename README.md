@@ -1,6 +1,7 @@
 ![PUBLISHER](./docs/images/publisher_logo.png)
 # PUBLISHER: Raspberry Pi Client for Sending Sensor Data
-[![Build Status](https://travis-ci.org/encresearch/publisher.svg?branch=master)](https://travis-ci.org/encresearch/publisher)
+![CI Simulation Tests](https://github.com/encresearch/publisher/workflows/Publisher%20Simulation%20CI/badge.svg?branch=master)
+
 
 Raspbian client that reads and sends data acquired by four [Adafruit ADS1115](https://learn.adafruit.com/adafruit-4-channel-adc-breakouts/overview) units connected to a Rapsberry Pi at 10Hz sample rate over MQTT to a broker.
 
@@ -36,10 +37,9 @@ For more information about the Raspberry Pi GPIO, visit [here](https://www.raspb
 ## Install and Run 
 These instructions are to get ```publisher``` up and running in your ```Raspberry Pi```. Make sure the hardware and wiring are set up correctly before trying to run the software.
 
-The dependencies can be met either by cloning into the project and setting up a conda environment based on the ```environment.yml``` file, or by building the publisher container alongside a telegraf container using the ```docker-compose.yml``` file. Instructions for both cases are explained below. **We recommend using Docker for installation**.
+The dependencies can be met either by cloning into the project and setting up a virtual environment based on one of our requirement files (dev, dev_x86, test, prod), or by building the publisher container using the ```docker-compose.dev.yml``` file. The dev_x86 will install the necessary packages to run this repo in simulation mode in a non-RaspberryPi machine. Instructions for both cases are explained below.
 
 ### Install and run with Docker
-> Telegraf not yet available
 
 Install [Docker](https://docs.docker.com/install/)
 ```
@@ -64,78 +64,44 @@ $ git clone https://github.com/encresearch/publisher.git
 Run docker-compose:
 
 ```
-$ sudo docker-compose -f docker-compose.yml up -d
+$ sudo docker-compose -f docker-compose.dev.yml up
 ```
 
 To stop and remove containers, networks and images created by up. (External volumes won't be removed):
 
 ```
-$ sudo docker-compose -f docker-compose.yml down
+$ sudo docker-compose -f docker-compose.dev.yml down
 ```
 
-### Install and Run with conda
-Telegraf will have to be setup manually
+### Install and Run without Docker
+You will need Python 3 and Pip3 installed. You might also need (depending on your OS and its version) libraries to compile Pandas and Numpy such as:
+- gcc
+- build-essential
+- gfortran
+- libopenblas-dev
+- libatlas-base-dev
 
-Install Miniconda
-
+Pay attention to what libraries you're missing during the next step, and just look for the package name online and install them. For example:
 ```
-$ sudo apt-get update && wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-armv7l.sh
-$ sudo md5sum Miniconda3-latest-Linux-armv7l.sh
-$ sudo /bin/bash Miniconda3-latest-Linux-armv7l.sh
-```
-
-Change the default installation directory to ```/home/pi/miniconda3```
-
-Edit the .bashrc file
-
-```
-$ sudo nano /home/pi/.bashrc
+$ sudo apt-get install gcc libopenblas-dev libatlas-base-dev
 ```
 
-And add this at the end:
-
-```export PATH="/home/pi/miniconda3/bin:$PATH"```
-
-***You need to close and open a new terminal for this change to take place.***
-
-Add directory permissions:
-
+Install our dependencies:
 ```
-$ sudo chown -R pi /home/pi/miniconda3
+$ pip3 install -r requirements/dev.txt
 ```
 
-Update conda package manager:
+The  script above will install the developlment dependencies, but depending on what you're working you might want to install the x86-simulation (dev_x86.txt), test (test.txt) or production (prod.txt) dependencies.
 
+Run it:
 ```
-$ conda update conda
-```
-
-Create a conda environment based off our YAML file (you will need to cd into publisher's directory first):
-
-```
-$ conda env create -f environment.yml
+$ python3 run.py
 ```
 
-Activate the environment:
+## Testing
+We are constantly updating our tests to cover as much as possible. Right now you can test the wiring and readings of the ADCs prior to deployment or during development.
 
-```
-source activate publisher
-```
-
-To run, cd into ```publisher/``` and execute the python file:
-
-```
-python publisher.py
-```
-
-## Testing [Work In Progress]
-We are constantly updating our tests to cover as much as possible. Right now you can test the wiring and readings of the ADCs prior to deployment or development. We are currently working on setting up integration and e2e tests.
-To run our unit tests locally, first setup and activate the ```conda``` environment as indicated in the installation section.
-
-Install pytest:
-```
-$ conda install pytest
-```
+To run our unit tests locally, first install the necessary dependencies as indicated in the installation section.
 
 Update ```test.sh``` permissions, in case you haven't alredy:
 ```
@@ -146,6 +112,13 @@ Run
 ```
 $ ./test.sh
 ```
+
+One of the tests that wun with this, will just output the readings from all the pins in the terminal. To make sure both hardware and software configurations are correct, use a configurable power supply and input a different voltage for each pin (don't forget to use a common ground with the Pi). You will have to "manually" test that the voltage outputs for each pin are the correct (assigned) ones.
+
+> Integration and E2E tests coming up!
+
+## Error Logging
+When errors are encountered while runing the application, and this one fails silently, you can find a traceback of the error in a newly-generated ```publisher.log``` file in the root of this project directory.   
 
 ## Simulation Mode
 To run in simulation mode, `publisher.py` will have to be executed from an `x86` machine. You will have to first install the dependencies from our `requirements/dev_x86.txt` using pip, and then just execute the `publisher.py` file. Bear in mind that in simulation mode, all ADC readings are random integers between -32767 and 32767 because of the GAIN that we set up the ADCs to in our production environment.
